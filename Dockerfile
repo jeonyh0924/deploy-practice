@@ -1,25 +1,30 @@
-# 이미지 빌드(ec2-deploy폴더에서 실행)
-#  docker build -t ec2-deploy -f Dockerfile .
-FROM        ubuntu:18.04
-MAINTAINER  hungyb0924@gmail.com
+# docker build -t eb:docker -f Dockerfile .
+FROM        jeonyh0924/eb-docker:base
 
+# settings 모듈에 대한 환경변수 설정
+ENV         DJANGO_SETTINGS_MODULE  config.settings.production
 
-# 패캐지 업그레이드 , 파이썬 3 설치
-RUN         apt -y update
-RUN         apt -y dist-upgrade
-RUN         apt -y instal l python3-pip
-
-# Nginx, uWSGI 설치 (WebServer, WSGI)
-RUN         apt -y install nginx
-RUN         pip3 install uwsgi
-#  docker build할때의 PATH에 해당하는 폴더의 전체 내용을
-#  Image의 /srv/project/폴더 내부에 복사
+# 전체 코드를 복사
 COPY        ./  /srv/project/
-
 WORKDIR     /srv/project/
-RUN         pip3 install -r requirements.txt
 
 # 프로세스를 실행할 명령
 WORKDIR     /srv/project/app
-CMD         python3 manage.py runserver 0:8000
 
+# Nginx
+# 기존에 존재하던 Nginx 설정파일들 삭제
+RUN         rm -rf  /etc/nginx/sites-available/* && \
+            rm -rf  /etc/nginx/sites-enabled/* && \
+            cp -f   /srv/project/.config/app.nginx \
+                    /etc/nginx/sites-available/ && \
+            ln -sf  /etc/nginx/sites-available/app.nginx \
+                    /etc/nginx/sites-enabled/app.nginx
+
+RUN         cp -f   /srv/project/.config/supervisord.conf \
+                    /etc/supervisor/conf.d/
+
+# 80번 포트 개방
+EXPOSE      80
+
+# Command로 supervisor실행
+CMD         supervisord -n
