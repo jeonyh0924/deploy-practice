@@ -15,6 +15,9 @@ AWS_ACCESS_KEY_ID = secrets['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = secrets['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME =secrets['AWS_STORAGE_BUCKET_NAME']
 
+# s3 버전 및 지역 설정
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_REGION_NAME = 'ap-northeast-2'
 # 로그폴더 생성
 LOG_DIR = os.path.join(ROOT_DIR, '.log')
 if not os.path.exists(LOG_DIR):

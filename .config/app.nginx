@@ -2,7 +2,7 @@ server {
     # 80번 포트로부터 받은 요청을 처리
     listen 80;
     # 도메인이 'localhost'에 해당 할 때
-    server_name localhost *.amazonaws.com;
+    server_name localhost *.amazonaws.com *.elasticbeanstalk.com;
     # 인코딩방식
     charset utf-8;
     # request/response의 최대 사이즈
