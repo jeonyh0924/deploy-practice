@@ -10,6 +10,7 @@ WORKDIR     /srv/project/
 
 # 프로세스를 실행할 명령
 WORKDIR     /srv/project/app
+#RUN         python3 manage.py collectstatic --noinputdo
 
 # Nginx
 # 기존에 존재하던 Nginx 설정파일들 삭제
@@ -23,7 +24,7 @@ RUN         rm -rf  /etc/nginx/sites-available/* && \
 RUN         cp -f   /srv/project/.config/supervisord.conf \
                     /etc/supervisor/conf.d/
 
-# 80번 포트 개방
+# docker 로 컨테이너를 실행시키고 80번 포트 개방하면 요청 처리가 가능
 EXPOSE      80
 
 # Command로 supervisor실행
