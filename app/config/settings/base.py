@@ -13,21 +13,22 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 SECRETS_DIR = os.path.join(ROOT_DIR, '.secrets')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
 secrets = json.load(open(os.path.join(SECRETS_DIR, 'base.json')))
 SECRET_KEY = secrets['SECRET_KEY']
 
 # Static
-
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
 STATIC_URL = '/static/'
 # collectstatic 했을 때 , 파일이 모이는 곳
 # STATICFILES_STORAGE 를
 # FileSystemStorage 로 지정했을 때만 사용
-STATIC_DIR = os.path.join(ROOT_DIR, '.static')
-STATICFILES_DIRS = [
-    STATIC_DIR,
-]
+STATIC_ROOT = os.path.join(ROOT_DIR, '.static')
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
 
