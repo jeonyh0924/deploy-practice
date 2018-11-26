@@ -20,7 +20,10 @@ SECRET_KEY = secrets['SECRET_KEY']
 
 # Static
 
-
+STATIC_URL = '/static/'
+# collectstatic 했을 때 , 파일이 모이는 곳
+# STATICFILES_STORAGE 를
+# FileSystemStorage 로 지정했을 때만 사용
 STATIC_DIR = os.path.join(ROOT_DIR, '.static')
 STATICFILES_DIRS = [
     STATIC_DIR,
@@ -107,4 +110,4 @@ USE_TZ = True
 
 
 
-STATIC_URL = '/static/'
+

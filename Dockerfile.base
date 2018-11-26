@@ -1,9 +1,12 @@
 # docker build -t ec2-deploy-practice:base -f Dockerfile.base .
 
+# 이미지 빌드
+
 FROM        python:3.6.7-slim
 MAINTAINER  hungyb0924@gmail.com
 ENV         LANG        C.UTF-8
 
+# 패캐지 업그레이드 Nginx , uWSGI 설치 (WebServer , WSGI)
 RUN         apt -y update
 RUN         apt -y dist-upgrade
 RUN         apt -y install gcc nginx supervisor && \
@@ -11,5 +14,7 @@ RUN         apt -y install gcc nginx supervisor && \
             apt -y remove gcc && \
             apt -y autoremove
 
-COPY        requirements.txt /tmp/requirements.txt
+# requirements.txt 파일만 복사 후 , 패캐지 설치
+# requirements.txt 파일의 내용이 바뀌지 않으면 pip3 install ... 부분이 실행되지 않음
+COPY        requirements.txt /tmp/
 RUN         pip3 install -r /tmp/requirements.txt
