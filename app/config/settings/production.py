@@ -3,6 +3,7 @@ from .base import *
 secrets = json.load(open(os.path.join(SECRETS_DIR, 'production.json')))
 
 DEBUG = False
+ALLOWED_HOSTS = secrets['ALLOWED_HOSTS']
 
 WSGI_APPLICATION = 'config.wsgi.production.application'
 
