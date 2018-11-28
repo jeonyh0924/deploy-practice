@@ -38,6 +38,7 @@ MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
 AUTH_USER_MODEL = 'members.User'
 
 INSTALLED_APPS = [
+    'reservations',
     'members',
 
     'django.contrib.admin',

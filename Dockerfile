@@ -10,7 +10,7 @@ WORKDIR     /srv/project/
 
 # 프로세스를 실행할 명령
 WORKDIR     /srv/project/app
-#RUN         python3 manage.py collectstatic --noinput
+RUN         python3 manage.py collectstatic --noinput
 
 # Nginx
 # 기존에 존재하던 Nginx 설정파일들 삭제
