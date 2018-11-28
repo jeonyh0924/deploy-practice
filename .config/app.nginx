@@ -6,7 +6,7 @@ server {
     listen 80;
     # 도메인이 'localhost'에 해당 할 때
 #    server_name localhost *.amazonaws.com *.elasticbeanstalk.com;
-    server_name localhost *.elasticbeanstalk.com;
+    server_name younghoonjean.com api.younghoonjean.com www.younghoonjean.com localhost *.elasticbeanstalk.com;
     # 인코딩방식
     charset utf-8;
     # request/response의 최대 사이즈
