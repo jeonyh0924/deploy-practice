@@ -1,4 +1,5 @@
 """config URL Configuration
+
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.1/topics/http/urls/
 Examples:
@@ -15,15 +16,23 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.views.generic import RedirectView
 
-from . import views
+from members.urls import urlpatterns_api_members
+
+urlpatterns_api = ([
+    path('members/', include(urlpatterns_api_members))
+], 'api')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
+    path('api/', include(urlpatterns_api)),
 ]
 
+
+# MEDIA_URL로 시작하는 URL은 static()내의 serve() 함수를 통해 처리
+# MEDIA_ROOT기준으로 파일을 검색함
 urlpatterns += static(
     prefix=settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT,
