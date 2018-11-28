@@ -1,6 +1,4 @@
 from .base import *
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
 
 
 secrets = json.load(open(os.path.join(SECRETS_DIR, 'production.json')))
@@ -28,12 +26,6 @@ AWS_STORAGE_BUCKET_NAME = secrets['AWS_STORAGE_BUCKET_NAME']
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_REGION_NAME = 'ap-northeast-2'
 
-
-# Sentry
-sentry_sdk.init(
-    dsn=secrets['SENTRY_DSN'],
-    integrations=[DjangoIntegration()]
-)
 
 # 로그폴더 생성
 LOG_DIR = os.path.join(ROOT_DIR, '.log')
