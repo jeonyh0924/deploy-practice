@@ -11,7 +11,7 @@ ALLOWED_HOSTS = [
     '.elasticbeanstalk.com',
     'www.younghoonjean.com',
     'younghoonjean.com',
-    'api.younghoonjean.com',
+    'api.younghoonjean.com'
 ]
 
 WSGI_APPLICATION = 'config.wsgi.production.application'
