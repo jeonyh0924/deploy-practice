@@ -38,7 +38,6 @@ MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
 AUTH_USER_MODEL = 'members.User'
 
 INSTALLED_APPS = [
-    'reservations',
     'members',
 
     'django.contrib.admin',
@@ -49,7 +48,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_extensions',
 ]
 
 REST_FRAMEWORK = {
@@ -115,7 +113,3 @@ TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-
-
-

@@ -6,10 +6,9 @@ secrets = json.load(open(os.path.join(SECRETS_DIR, 'production.json')))
 DEBUG = False
 
 ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
     '.elasticbeanstalk.com',
-    'younghoonjean.com',
-    'www.younghoonjean.com',
-    'api.younghoonjean.com'
 ]
 
 WSGI_APPLICATION = 'config.wsgi.production.application'
