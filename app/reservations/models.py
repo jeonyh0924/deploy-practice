@@ -42,7 +42,7 @@ class Movie(models.Model):
     # 트레일러
     trailer = models.URLField(blank=True, null=True)
     # 스틸컷
-    stillcut = models.CharField(max_length=500)
+    stillcut = models.CharField(max_length=500, null=True, blank=True)
 
 
 # 영화관(Theater) 객체 모델

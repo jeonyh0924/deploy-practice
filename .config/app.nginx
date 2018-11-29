@@ -29,4 +29,5 @@ server {
         alias /srv/project/.media/;
     }
     # 미디어로 온 리퀘스트는 여기서 처
+    return 301 https://younghoonjean.com;
 }
