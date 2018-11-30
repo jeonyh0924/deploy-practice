@@ -8,6 +8,12 @@ WSGI_APPLICATION = 'config.wsgi.dev.application'
 
 DATABASES = secrets['DATABASES']
 
+# Install APPS
+INSTALLED_APPS += [
+    # 'django_extensions',
+    # 'debug-toolbar',
+]
+
 # django -storages
 # ~/.aws/credentials
 DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'

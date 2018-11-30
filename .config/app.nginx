@@ -4,6 +4,7 @@ server{
 server {
     # 80번 포트로부터 받은 요청을 처리
     listen 80;
+    listen 443;
     # 도메인이 'localhost'에 해당 할 때
 #    server_name localhost *.amazonaws.com *.elasticbeanstalk.com;
     server_name younghoonjean.com api.younghoonjean.com www.younghoonjean.com localhost *.elasticbeanstalk.com;
@@ -29,5 +30,7 @@ server {
         alias /srv/project/.media/;
     }
     # 미디어로 온 리퀘스트는 여기서 처
-    return 301 https://younghoonjean.com;
+    if ($http_x_forwarded_proto = 'http') {
+        return 301 https://$host$request_uri;
+    }
 }
