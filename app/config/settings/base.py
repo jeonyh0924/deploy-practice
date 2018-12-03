@@ -35,7 +35,7 @@ MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
 
 
 # WebDriver for Crawling Base Instances
-CHROME_DRIVER = os.path.join(os.path.join(ROOT_DIR, 'CGVcrawler'), 'chromedriver')
+CHROME_DRIVER = os.path.join(ROOT_DIR, 'chromedriver')
 
 # Auth
 AUTH_USER_MODEL = 'members.User'
