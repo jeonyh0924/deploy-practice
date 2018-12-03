@@ -20,14 +20,18 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 
 from members.urls import urlpatterns_api_members
+from reservations.urls import urlpatterns_api_movies
 
 urlpatterns_api = ([
-    path('members/', include(urlpatterns_api_members))
+    path('members/', include(urlpatterns_api_members)),
+    path('movies/', include(urlpatterns_api_movies)),
 ], 'api')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(urlpatterns_api)),
+    # 관리자 페이지 nested inline 구현 위한 url
+    path('nested_admin/', include('nested_admin.urls')),
 ]
 
 
