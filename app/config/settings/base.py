@@ -83,6 +83,7 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000',
+    # 나중에 프론트엔드에서 배포 완료하고 접속하는 사이트 있으면, 우리가 여기에 달아주면 된다.
 )
 
 CORS_ALLOW_METHODS = (

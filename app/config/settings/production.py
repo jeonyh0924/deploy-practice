@@ -1,3 +1,6 @@
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from .base import *
 
 
@@ -26,8 +29,14 @@ AWS_SECRET_ACCESS_KEY = secrets['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = secrets['AWS_STORAGE_BUCKET_NAME']
 
 # s3 버전 및 지역 설정
-# AWS_S3_SIGNATURE_VERSION = 's3v4'
-# AWS_S3_REGION_NAME = 'ap-northeast-2'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_REGION_NAME = 'ap-northeast-2'
+
+#sentry
+sentry_sdk.init(
+    dsn=secrets['SENTRY_DSN'],
+    integrations=[DjangoIntegration()]
+)
 
 
 # 로그폴더 생성

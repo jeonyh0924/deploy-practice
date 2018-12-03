@@ -8,3 +8,4 @@ django-nested-admin<3.2.0
 psycopg2-binary<2.8
 Pillow<5.4
 pytz<2018.8
+sentry-sdk<0.6

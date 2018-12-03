@@ -1,3 +1,4 @@
 awsebcli<3.15
 ipython<7.2
 django-debug-toolbar<1.11
+sentry-sdk<0.6.0
