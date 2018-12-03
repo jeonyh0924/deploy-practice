@@ -58,6 +58,10 @@ class AuditoriumInline(nested_admin.nested.NestedStackedInline):
     model = Auditorium
     extra = 1
 
+#
+# class CurrentMovieInline(nested_admin.nested.NestedStackedInline):
+#     model = Theater.current_movies.through
+
 
 # 극장 admin setting
 class TheaterAdmin(nested_admin.nested.NestedModelAdmin):

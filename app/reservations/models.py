@@ -215,15 +215,15 @@ class Reservation(models.Model):
         ordering = ['-pk']
 
     # 예매 유저
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     # 예매 영화
     # movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     # 예매 극장
     # theater = models.ForeignKey(Theater, on_delete=models.CASCADE)
     # 예매 상영 정보(상영관)
-    screening = models.ForeignKey(Screening, on_delete=models.CASCADE)
+    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, blank=True, null=True)
     # 예매 상영 시간
-    screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE)
+    screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, blank=True, null=True)
     # 예매 좌석 정보
     # seat = models.ForeignKey(SelectedSeat, on_delete=models.CASCADE)
     # 결제 완료 시점(예매 시간)
