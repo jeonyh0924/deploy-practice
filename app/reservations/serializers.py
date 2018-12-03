@@ -4,24 +4,24 @@ from reservations.models import Movie, Stillcut
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    # main_image_url = serializers.SerializerMethodField()
+    main_img_url = serializers.SerializerMethodField()
     class Meta:
         model = Movie
         fields = (
             'pk',
             'title',
             'reservation_score',
-            # 'main_image_url',
+            'main_img_url',
             'now_show',
             'opening_date'
         )
 
         # fields = '__all__'
 
-    def get_main_image_url(self, movie):
+    def get_main_img_url(self, movie):
         request = self.context.get('request')
-        main_image_url = movie.main_image.url
-        return request.build_absolute_uri(main_image_url)
+        main_img_url = movie.main_img.url
+        return request.build_absolute_uri(main_img_url)
 
 
 class StillcutSerializer(serializers.ModelSerializer):

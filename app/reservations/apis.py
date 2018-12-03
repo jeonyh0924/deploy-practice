@@ -17,11 +17,13 @@ from reservations.serializers import MovieSerializer, MovieDetailSerializer
 
 class MovieListView(ListAPIView):
     queryset = Movie.objects.all()
-    print(queryset)
+    # print(queryset)
     serializer_class = MovieSerializer
 
 # 영화 상세 정보 리스트 API View
 # 영화 pk를 받는다.
+
+
 class MovieDetailView(APIView):
     def get(self, request, pk):
         movie = get_object_or_404(Movie, pk=pk)
