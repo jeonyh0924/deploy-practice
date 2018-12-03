@@ -15,12 +15,17 @@ from reservations.models import *
 
 
 # 영화 Admin setting
-class StillcutInline(admin.StackedInline):
+class StillcutInline(nested_admin.nested.NestedStackedInline):
     model = Stillcut
     extra = 1
 
 
-class MovieAdmin(admin.ModelAdmin):
+class CastInline(nested_admin.nested.NestedStackedInline):
+    model = Cast
+    extra = 1
+
+
+class MovieAdmin(nested_admin.nested.NestedModelAdmin):
     def now_show_update(modeladmin, request, queryset):
         for movie in queryset:
             if movie.opening_date <= datetime.date.today():
@@ -30,7 +35,11 @@ class MovieAdmin(admin.ModelAdmin):
     now_show_update.short_description = "현재 상영작 업데이트"
 
     list_display = ['title']
-    inlines = [StillcutInline]
+    list_filter = (
+        'genre',
+        'now_show',
+    )
+    inlines = [CastInline, StillcutInline]
     actions = [now_show_update]
 
     def save_model(self, request, obj, form, change):
@@ -65,7 +74,10 @@ class SeatInline(nested_admin.nested.NestedTabularInline):
 class AuditoriumAdmin(nested_admin.nested.NestedModelAdmin):
     inlines = [ScreeningInline, SeatInline]
     list_display = ('name', 'theater', 'seats_no')
-    list_filter = ('theater',)
+    list_filter = (
+        'theater__location',
+        'theater__sub_location',
+                   )
 
 
 class AuditoriumInline(nested_admin.nested.NestedStackedInline):
@@ -82,6 +94,10 @@ class TheaterAdmin(nested_admin.nested.NestedModelAdmin):
     model = Theater
     inlines = [AuditoriumInline]
     list_display = ('sub_location', 'location', 'get_auditorium')
+    list_filter = (
+        'location',
+        'current_movies',
+    )
 
     def get_auditorium(self, obj):
         auditoriums = obj.auditorium_set.all()
