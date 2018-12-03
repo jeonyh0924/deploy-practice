@@ -34,6 +34,9 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
 
 
+# WebDriver for Crawling Base Instances
+CHROME_DRIVER = os.path.join(os.path.join(ROOT_DIR, '.crawler'), 'chromedriver')
+
 # Auth
 AUTH_USER_MODEL = 'members.User'
 
@@ -49,6 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_extensions',
+    'nested_admin',
 ]
 
 REST_FRAMEWORK = {

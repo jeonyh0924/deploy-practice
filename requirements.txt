@@ -14,7 +14,7 @@ decorator==4.3.0
 Django==2.1.2
 django-extensions==2.1.3
 django-filter==2.0.0
-django-phonenumber-field==2.1.0
+django-nested-admin==3.1.2
 django-storages==1.7.1
 djangorestframework==3.9.0
 docker==3.5.1
@@ -42,14 +42,16 @@ psycopg2-binary==2.7.6.1
 ptyprocess==0.6.0
 Pygments==2.2.0
 python-dateutil==2.7.5
+python-monkey-business==1.0.0
 pytz==2018.7
 PyYAML==3.13
 requests==2.18.4
 s3transfer==0.1.13
+selenium==3.141.0
 semantic-version==2.5.0
+sentry-sdk==0.5.5
 Serializer==0.2.1
 simplejson==3.16.0
-sentry-sdk==0.5.5
 six==1.11.0
 termcolor==1.1.0
 texttable==0.9.1

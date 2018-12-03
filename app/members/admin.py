@@ -1,10 +1,9 @@
 from django.contrib import admin
-from reservations.models import *
+from .models import *
+# Register your models here.
 
-admin.site.register(Movie)
-admin.site.register(Theater)
-admin.site.register(Reservation)
-admin.site.register(Auditorium)
-admin.site.register(Seat)
-admin.site.register(Screening)
-# 극장 상영관 좌석 스크린
+
+admin.site.register(User)
+
+# User admin page에 Reservation 을 Inline으로 추가할 것.
+# 빠른 예매 취소 등의 관리를 위한 페이지
