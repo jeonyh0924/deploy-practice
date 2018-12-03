@@ -17,10 +17,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import RedirectView
-
 from members.urls import urlpatterns_api_members
 from reservations.urls import urlpatterns_api_movies
+
 
 urlpatterns_api = ([
     path('members/', include(urlpatterns_api_members)),
@@ -33,7 +32,6 @@ urlpatterns = [
     # 관리자 페이지 nested inline 구현 위한 url
     path('nested_admin/', include('nested_admin.urls')),
 ]
-
 
 # MEDIA_URL로 시작하는 URL은 static()내의 serve() 함수를 통해 처리
 # MEDIA_ROOT기준으로 파일을 검색함

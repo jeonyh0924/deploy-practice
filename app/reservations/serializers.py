@@ -11,7 +11,7 @@ class MovieSerializer(serializers.ModelSerializer):
             'pk',
             'title',
             'reservation_score',
-            'main_img_url',
+            'main_image_url',
             'now_show',
             'opening_date'
         )

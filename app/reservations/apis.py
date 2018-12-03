@@ -6,6 +6,8 @@ from reservations.models import Movie
 from reservations.serializers import MovieSerializer, MovieDetailSerializer
 
 # 영화 기본 정보 리스트 API View
+
+
 class MovieListView(APIView):
     def get(self, request):
         movie_list = Movie.objects.all()
