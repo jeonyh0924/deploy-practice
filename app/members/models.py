@@ -7,9 +7,13 @@ from django.db import models
 
 
 class User(AbstractUser):
+    def __str__(self):
+        return f'{self.last_name}{self.first_name}'
+
     class Meta:
         verbose_name = '유저'
         verbose_name_plural = f'{verbose_name} 목록'
+        ordering = ['-pk']
 
     phone_number = models.CharField('Phone Number', max_length=20, blank=True)
 
