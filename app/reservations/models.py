@@ -19,18 +19,9 @@ def main_directory_path(instance, filename):
     return f'{directory}/{filename}'
 
 
-# def main_directory_path(instance, filename):
-#     directory = re.split('\.', filename)[0]
-#     return f'{directory}/{filename}'
-
 def still_cut_directory_path(instance, filename):
     directory = instance.movie.title
     return f'{directory}/{filename}'
-
-
-# def still_cut_directory_path(instance, filename):
-#     directory = re.split('_', filename)[0]
-#     return f'{directory}/{filename}'
 
 
 # 영화(Movie) 객체 모델
