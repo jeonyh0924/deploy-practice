@@ -38,6 +38,10 @@ MEDIA_ROOT = os.path.join(ROOT_DIR, '.media')
 AUTH_USER_MODEL = 'members.User'
 
 INSTALLED_APPS = [
+    # django-cors-header
+    'corsheaders',
+
+
     'reservations',
     'members',
 
@@ -59,6 +63,10 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    # django-cors-headers middleware
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -67,6 +75,20 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:3000',
+)
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+)
+
 
 ROOT_URLCONF = 'config.urls'
 
