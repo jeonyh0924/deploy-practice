@@ -19,7 +19,6 @@ DATABASES = secrets['DATABASES']
 
 # Install APPS
 INSTALLED_APPS += [
-    'sentry-sdk',
     'debug_toolbar',
 ]
 

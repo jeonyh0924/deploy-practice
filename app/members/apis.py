@@ -103,6 +103,13 @@ class UserProfileView(RetrieveUpdateAPIView):
         if lookup_url_kwarg not in self.kwargs:
             return self.request.user
 
+    # method for creating password hashing relation
+    def perform_update(self, serializer):
+        super(UserProfileView, self).perform_update(serializer)
+        instance = serializer.save()
+        instance.set_password(instance.password)
+        instance.save()
+
 
 # Logout View
 class LogoutView(APIView):
