@@ -5,10 +5,15 @@ from rest_framework.views import APIView
 from reservations.models import Movie
 from reservations.serializers import MovieSerializer, MovieDetailSerializer
 
+
 # 영화 기본 정보 리스트 API View
+# request.GET으로 
 class MovieListView(APIView):
     def get(self, request):
-        movie_list = Movie.objects.all()
+        if request.GET.get('now_show'):
+            movie_list = Movie.objects.filter(now_show=True)
+        else:
+            movie_list = Movie.objects.all()
         serializers = MovieSerializer(movie_list, many=True, context={"request": request})
         return Response(serializers.data)
 
