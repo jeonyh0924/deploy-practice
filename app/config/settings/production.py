@@ -22,7 +22,7 @@ WSGI_APPLICATION = 'config.wsgi.production.application'
 DATABASES = secrets['DATABASES']
 
 # .static 을 Storage 공간으로 사용하려면 아래 설정을 주석 처리 해야한다.
-# DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'
+DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'
 
 AWS_ACCESS_KEY_ID = secrets['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = secrets['AWS_SECRET_ACCESS_KEY']
