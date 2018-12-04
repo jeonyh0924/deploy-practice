@@ -2,12 +2,12 @@ import datetime
 
 from django.contrib import admin
 import nested_admin
+from django.shortcuts import render
 from django.utils import timezone
 from nested_admin.nested import NestedModelAdmin
 from reservations.models import *
 
 
-# 각 change list 페이지에 filter & search 기능 달기
 # 좌석 bulk create 기능 가능 여부
 # image 프리뷰 달기
 # custom button & custom View 생성 여부 > 영화 검색기능 달기(영화진흥위원회 Open API 활용)
@@ -72,12 +72,16 @@ class SeatInline(nested_admin.nested.NestedTabularInline):
 
 # 상영관 Admin setting
 class AuditoriumAdmin(nested_admin.nested.NestedModelAdmin):
+    # def seat_update(modeladmin, request, queryset):
+    #     for auditorium in queryset:
+    #         return render(request, 'admin/seateditor.html', context={})
     inlines = [ScreeningInline, SeatInline]
     list_display = ('name', 'theater', 'seats_no')
     list_filter = (
         'theater__location',
         'theater__sub_location',
                    )
+    # actions = [seat_update]
 
 
 class AuditoriumInline(nested_admin.nested.NestedStackedInline):
