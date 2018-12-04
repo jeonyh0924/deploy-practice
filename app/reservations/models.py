@@ -40,42 +40,46 @@ class Movie(models.Model):
         max_length=50,
         blank=True,
         null=True,
+        verbose_name='타이틀'
     )
     # 감독
-    director = models.CharField(max_length=30, blank=True, null=True)
+    director = models.CharField(max_length=30, blank=True, null=True, verbose_name='감독')
 
     # 출연배우(cast) 관련 수정 가능 사항
     # 만약 배우를 새로운 object로 만들어 해당 배우 정보 및 출연작 정보를
     # 나타내도록 구현하고자 한다면 cast = models.ManyToManyField로 만들어야한다.
 
-    # List(Array) object를 저장할 수 있는 modelfield는 없는 것으로 보인다
-    # 이 경우 두 가지의 방법을 생각할 수 있다
-    # 1) 'obj1, obj2, ... ' 의 charfield로 받은 후, 이후 사용시 split() method로
-    # list도 추후에 환원한다.
-    # 2) PostgreSQL을 사용하는 경우, 이들 library에서 ArrayField를 import하는 방법이 있다.
-
-    # 출연 배우
-    cast = models.CharField(max_length=128, blank=True, null=True)
     # 러닝타임
-    duration_min = models.IntegerField(blank=True, null=True)
+    duration_min = models.IntegerField(blank=True, null=True, verbose_name='러닝타임')
     # 개봉일
-    opening_date = models.DateField(blank=True, null=True)
+    opening_date = models.DateField(blank=True, null=True, verbose_name='개봉일')
     # 영화 장르
-    genre = models.CharField(max_length=32, blank=True, null=True)
+    genre = models.CharField(max_length=32, blank=True, null=True, verbose_name='장르')
     # 영화 줄거리
-    description = models.TextField(max_length=512, blank=True, null=True)
+    description = models.TextField(max_length=512, blank=True, null=True, verbose_name='줄거리')
     # 트레일러
-    trailer = models.URLField(default='', blank=True, null=True)
+    trailer = models.URLField(default='', blank=True, null=True, verbose_name='트레일러')
     # 예매율
-    reservation_score = models.FloatField(default=0, blank=True, null=True)
+    reservation_score = models.FloatField(default=0, blank=True, null=True, verbose_name='예매율')
     # 상영 여부
     # timezone.now() 와 비교하여 전체 instance 일괄 업데이트
     # admin.action 버튼 생성
-    now_show = models.BooleanField(default=False, blank=True, null=True)
+    now_show = models.BooleanField(default=False, blank=True, null=True, verbose_name='상영 여부')
     # 영화 메인 포스터
-    main_img = models.ImageField(upload_to=main_directory_path, blank=True, null=True)
+    main_img = models.ImageField(upload_to=main_directory_path, blank=True, null=True, verbose_name='메인 포스터')
     # 예매 내역 저장
     # reservation_history = JSONField(blank=True, null=True)
+
+class Cast(models.Model):
+    def __str__(self):
+        return self.actor
+
+    class Meta:
+        verbose_name = '배우'
+        verbose_name_plural = f'{verbose_name} 목록'
+        ordering = ['-pk']
+    movie = models.ForeignKey(Movie, related_name='casts', blank=True, null=True, on_delete=models.CASCADE, verbose_name='영화')
+    actor = models.CharField(max_length=64, blank=True, null=True, verbose_name='배우')
 
 
 # 스틸컷
@@ -90,8 +94,8 @@ class Stillcut(models.Model):
         verbose_name_plural = f'{verbose_name} 목록'
         ordering = ['-pk']
 
-    movie = models.ForeignKey(Movie, related_name='stillcuts', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=still_cut_directory_path)
+    movie = models.ForeignKey(Movie, related_name='stillcuts', on_delete=models.CASCADE, verbose_name='영화')
+    image = models.ImageField(upload_to=still_cut_directory_path, verbose_name='스틸컷 이미지')
 
 
 # 영화관(Theater) 객체 모델
@@ -105,11 +109,11 @@ class Theater(models.Model):
         ordering = ['-pk']
 
     # 지역 대분류(광역시/도 단위 카테고리 ex) 서울 / 충청남도)
-    location = models.CharField(max_length=10)
+    location = models.CharField(max_length=10, verbose_name='지역')
     # 지역 소분류 = 영화관 이름( ex)강남점, 신촌점)
-    sub_location = models.CharField(max_length=15)
+    sub_location = models.CharField(max_length=15, verbose_name='지점')
     # 세부 주소정보 : 텍스트 주소 or 경도/위도 사용
-    address = models.CharField(max_length=50)
+    address = models.CharField(max_length=50, verbose_name='주소')
 
     # 상영중인 영화(Movie 목록)
     # 이후 immediate를 through로 설정히가나
@@ -119,6 +123,7 @@ class Theater(models.Model):
         through='Screening',
         related_name='theaters',
         related_query_name='theater',
+        verbose_name='상영 영화',
     )
 
 
@@ -133,11 +138,11 @@ class Auditorium(models.Model):
         ordering = ['-pk']
 
     # 상영관 이름( ex) A관, 2관 .... )
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=10, verbose_name='상영관 이름')
     # 좌석수
-    seats_no = models.IntegerField(default=0)
+    seats_no = models.IntegerField(default=0, verbose_name='좌석 수')
     # 소속 영화관
-    theater = models.ForeignKey(Theater, on_delete=models.CASCADE)
+    theater = models.ForeignKey(Theater, on_delete=models.CASCADE, verbose_name='소속 영화관')
 
 
 # 상영(Screening) 객체 모델
@@ -151,11 +156,11 @@ class Screening(models.Model):
         ordering = ['-pk']
 
     # 상영 영화
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, )
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, verbose_name='상영 영화')
     # 상영 영화관(theater)
-    theater = models.ForeignKey(Theater, on_delete=models.CASCADE, )
+    theater = models.ForeignKey(Theater, on_delete=models.CASCADE, verbose_name='상영 영화관')
     # 상영관(auditorium)
-    auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE)
+    auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE, verbose_name='상영관')
 
 
 # 상영시간
@@ -169,8 +174,8 @@ class ScreeningTime(models.Model):
         verbose_name_plural = f'{verbose_name} 목록'
         ordering = ['-pk']
 
-    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, related_name='screening_times')
-    time = models.DateTimeField()
+    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, related_name='screening_times', verbose_name='상영')
+    time = models.DateTimeField(verbose_name='상영 시간')
 
 
 # 좌석(Seat) 객체 모델
@@ -184,13 +189,13 @@ class Seat(models.Model):
         ordering = ['-pk']
 
     # 좌석 위치(행)
-    row = models.IntegerField()
+    row = models.IntegerField(verbose_name='행')
     # 좌석 위치(열)
-    number = models.IntegerField()
+    number = models.IntegerField(verbose_name='열')
     # 배치 상영관
-    auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE)
+    auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE, verbose_name='배치 상영관')
     # 예매 여부
-    reservation_check = models.BooleanField()
+    reservation_check = models.BooleanField(verbose_name='예매 여부')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -215,21 +220,21 @@ class Reservation(models.Model):
         ordering = ['-pk']
 
     # 예매 유저
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매자')
     # 예매 영화
     # movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     # 예매 극장
     # theater = models.ForeignKey(Theater, on_delete=models.CASCADE)
     # 예매 상영 정보(상영관)
-    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, blank=True, null=True)
+    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, blank=True, null=True, verbose_name='상영 예매')
     # 예매 상영 시간
-    screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, blank=True, null=True)
+    screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매 시간')
     # 예매 좌석 정보
     # seat = models.ForeignKey(SelectedSeat, on_delete=models.CASCADE)
     # 결제 완료 시점(예매 시간)
     # created_at = models.DateTimeField(auto_now_add=True)
     # 취소 여부 확인
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, verbose_name='활성화')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -251,8 +256,8 @@ class SelectedSeat(models.Model):
         verbose_name_plural = f'{verbose_name} 목록'
         ordering = ['-pk']
 
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='selected_seats')
-    seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='selected_seats', verbose_name='예약')
+    seat = models.ForeignKey(Seat, on_delete=models.CASCADE, verbose_name='좌석')
 
 # 이후 reservation_type (ex) 청소년, 일반 ...)을 추가할 수 있다.
 # 이 경우는 Reservation에 reservation_type 필드를 추가하고,

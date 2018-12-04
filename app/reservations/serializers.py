@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reservations.models import Movie, Stillcut
+from reservations.models import Movie, Stillcut, Cast
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class StillcutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stillcut
         fields = (
-            'movie',
+            # 'movie',
             'image_url',
         )
 
@@ -46,8 +46,18 @@ class StillcutSerializer(serializers.ModelSerializer):
             return ""
 
 
+class CastSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cast
+        fields = (
+            # 'movie',
+            'actor',
+        )
+
+
 class MovieDetailSerializer(serializers.ModelSerializer):
     stillcuts = StillcutSerializer(many=True)
+    casts = CastSerializer(many=True)
     main_img_url = serializers.SerializerMethodField()
     class Meta:
         model = Movie
@@ -55,7 +65,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
             'pk',
             'title',
             'director',
-            'cast',
+            'casts',
             'duration_min',
             'opening_date',
             'genre',
