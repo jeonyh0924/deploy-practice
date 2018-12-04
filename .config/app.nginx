@@ -29,7 +29,7 @@ server {
     location /media/ {
         alias /srv/project/.media/;
     }
-    # 미디어로 온 리퀘스트는 여기서 처
+    # 미디어로 온 리퀘스트는 여기서 처리
     if ($http_x_forwarded_proto = 'http') {
         return 301 https://$host$request_uri;
     }

@@ -16,6 +16,11 @@ class MovieSerializer(serializers.ModelSerializer):
             'opening_date'
         )
 
+        # fields = '__all__'
+    # def get_main_img_url(self, movie):
+    #     request = self.context.get('request')
+    #     main_img_url = movie.main_img.url
+    #     return request.build_absolute_uri(main_img_url)
     def get_main_img_url(self, movie):
         request = self.context.get('request')
         try:
@@ -23,8 +28,6 @@ class MovieSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(main_img_url)
         except AttributeError:
             return ""
-
-
 
 
 class StillcutSerializer(serializers.ModelSerializer):

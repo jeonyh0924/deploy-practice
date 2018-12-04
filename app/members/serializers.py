@@ -6,6 +6,8 @@ from rest_framework.exceptions import AuthenticationFailed
 User = get_user_model()
 
 # User Serializer
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

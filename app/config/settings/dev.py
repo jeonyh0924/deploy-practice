@@ -6,13 +6,22 @@ DEBUG = True
 ALLOWED_HOSTS = secrets['ALLOWED_HOSTS']
 WSGI_APPLICATION = 'config.wsgi.dev.application'
 
+# RDS - psql 사용시에
 DATABASES = secrets['DATABASES']
+
+# SQlite3
+# DATABASES = {
+#      'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+#     }
+# }
 
 # Install APPS
 INSTALLED_APPS += [
-    # 'django_extensions',
-    # 'debug-toolbar',
+    'debug_toolbar',
 ]
+
 
 # django -storages
 # ~/.aws/credentials
@@ -32,3 +41,12 @@ AWS_STORAGE_BUCKET_NAME =secrets['AWS_STORAGE_BUCKET_NAME']
 LOG_DIR = os.path.join(ROOT_DIR, '.log')
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR, exist_ok=True)
+
+# debug-toolbar Middleware
+MIDDLEWARE +=[
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+# djang-debug-toolbar
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
