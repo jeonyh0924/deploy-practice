@@ -7,7 +7,7 @@ import requests
 from datetime import datetime
 from config.settings.base import CHROME_DRIVER
 from mappings.models import Cast
-from reservations.models import Movie, Stillcut
+from mappings.models import Movie, Stillcut
 from selenium.common.exceptions import NoSuchElementException
 
 
@@ -72,4 +72,3 @@ for url in detail_urls:
         except NoSuchElementException:
             pass
             time.sleep(1)
-
