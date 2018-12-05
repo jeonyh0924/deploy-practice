@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     # django-cors-header
     'corsheaders',
 
-
     'reservations',
     'members',
 
