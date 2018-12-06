@@ -20,11 +20,12 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 
 from members.urls import urlpatterns_api_members
-from reservations.urls import urlpatterns_api_movies
+from mappings.urls import urlpatterns_api_movies, urlpatterns_api_theaters
 
 urlpatterns_api = ([
     path('members/', include(urlpatterns_api_members)),
     path('movies/', include(urlpatterns_api_movies)),
+    path('theaters/', include(urlpatterns_api_theaters))
 ], 'api')
 
 urlpatterns = [

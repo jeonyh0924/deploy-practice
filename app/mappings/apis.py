@@ -7,7 +7,11 @@ from mappings.models import Movie, Theater
 from mappings.serializers import MovieSerializer, MovieDetailSerializer, TheaterListSerializer, \
     TheaterDetailSerializer
 
+
+
+
 # Seat bulk create code
+
 # theater_list = Theater.objects.all()
 # auditorium_list = [theater.auditoriums.all() for theater in theater_list]
 # for auditorium_set in auditorium_list:
