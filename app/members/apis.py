@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import RetrieveUpdateAPIView
 
-from .serializers import UserSerializer, FacebookSerializer, CheckUniqueIDSerializer
+from .serializers import UserSerializer, SocialAccountSerializer, CheckUniqueIDSerializer
 # from rest_framework.authtoken.serializers import AuthCustomTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -61,7 +61,7 @@ class AuthTokenView(APIView):
 
 
 # Social Account Signup-Login APIView
-class FacebookAuthTokenView(APIView):
+class SocialAuthTokenView(APIView):
     """
     facebook SDK를 통해 얻은 사용자 정보를
     다음과 같은 5개 필드에 담아 JSON형식 - POST 요청으로 전송
@@ -74,7 +74,7 @@ class FacebookAuthTokenView(APIView):
 
     """
     def post(self, request):
-        serializer = FacebookSerializer(data=request.data)
+        serializer = SocialAccountSerializer(data=request.data)
         if serializer.is_valid():
             token, created = Token.objects.get_or_create(user=serializer.user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
@@ -120,3 +120,9 @@ class LogoutView(APIView):
     def get(self, request):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
+
+
+# All User List View
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

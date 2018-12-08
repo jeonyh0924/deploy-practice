@@ -13,7 +13,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = '유저'
         verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['-pk']
+        ordering = ['pk']
 
     phone_number = models.CharField('Phone Number', max_length=20, blank=True)
 
