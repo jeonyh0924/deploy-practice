@@ -25,7 +25,7 @@ from mappings.urls import urlpatterns_api_movies, urlpatterns_api_theaters
 urlpatterns_api = ([
     path('members/', include(urlpatterns_api_members)),
     path('movies/', include(urlpatterns_api_movies)),
-    path('theaters/', include(urlpatterns_api_theaters)),
+    path('theaters/', include(urlpatterns_api_theaters))
 ], 'api')
 
 urlpatterns = [

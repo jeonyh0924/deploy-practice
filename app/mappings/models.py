@@ -107,7 +107,7 @@ class Theater(models.Model):
     class Meta:
         verbose_name = '극장'
         verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['-pk']
+        ordering = ['pk']
 
     # 지역 대분류(광역시/도 단위 카테고리 ex) 서울 / 충청남도)
     location = models.CharField(max_length=10, verbose_name='지역')
@@ -136,7 +136,7 @@ class Auditorium(models.Model):
     class Meta:
         verbose_name = '상영관'
         verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['-pk']
+        ordering = ['pk']
 
     # 상영관 이름( ex) A관, 2관 .... )
     name = models.CharField(max_length=10, verbose_name='상영관 이름')
@@ -185,7 +185,7 @@ class Screening(models.Model):
     class Meta:
         verbose_name = '상영'
         verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['-pk']
+        ordering = ['pk']
 
     # 상영 영화
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, verbose_name='상영 영화', related_name='screenings')
@@ -245,7 +245,7 @@ class Reservation(models.Model):
     class Meta:
         verbose_name = '예약'
         verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['-pk']
+        ordering = ['pk']
 
     # 예매 유저
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매자', related_name='mappings', related_query_name='reservation')

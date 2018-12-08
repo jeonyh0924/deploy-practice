@@ -8,4 +8,5 @@ urlpatterns_api_members = ([
   path('social-login/', apis.SocialAuthTokenView.as_view()),
   path('logout/', apis.LogoutView.as_view()),
   path('checkID/', apis.CheckUniqueIDView.as_view()),
+  path('user-list/', apis.UserListView.as_view()),
 ], 'members')
