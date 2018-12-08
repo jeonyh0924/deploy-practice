@@ -70,6 +70,7 @@ class Movie(models.Model):
     # 예매 내역 저장
     # reservation_history = JSONField(blank=True, null=True)
 
+
 class Cast(models.Model):
     def __str__(self):
         return self.actor
