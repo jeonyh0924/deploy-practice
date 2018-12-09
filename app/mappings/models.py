@@ -179,7 +179,7 @@ class Seat(models.Model):
 # 상영(Screening) 객체 모델
 class Screening(models.Model):
     def __str__(self):
-        return self.auditorium.name
+        return self.movie.title
 
     class Meta:
         verbose_name = '상영'
@@ -192,20 +192,7 @@ class Screening(models.Model):
     theater = models.ForeignKey(Theater, on_delete=models.CASCADE, verbose_name='상영 영화관', related_name='screenings')
     # 상영관(auditorium)
     auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE, verbose_name='상영관', related_name='screenings')
-
-
-# 상영시간
-# screening_time ArrayField 작동 불가.
-class ScreeningTime(models.Model):
-    def __str__(self):
-        return str(self.time)
-
-    class Meta:
-        verbose_name = '상영 시간'
-        verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['pk']
-
-    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, related_name='screening_times', verbose_name='상영')
+    # 상영 시간
     time = models.DateTimeField(verbose_name='상영 시간')
     # 각 상영시간 단위 Seat
     reserved_seats = models.ManyToManyField(
@@ -214,6 +201,28 @@ class ScreeningTime(models.Model):
         related_name='screen_times',
         related_query_name='screen_time',
     )
+
+
+# 상영시간
+# screening_time ArrayField 작동 불가.
+# class ScreeningTime(models.Model):
+#     def __str__(self):
+#         return str(self.time)
+#
+#     class Meta:
+#         verbose_name = '상영 시간'
+#         verbose_name_plural = f'{verbose_name} 목록'
+#         ordering = ['pk']
+#
+#     screening = models.ForeignKey(Screening, on_delete=models.CASCADE, related_name='screening_times', verbose_name='상영')
+#     time = models.DateTimeField(verbose_name='상영 시간')
+#     # 각 상영시간 단위 Seat
+#     reserved_seats = models.ManyToManyField(
+#         Seat,
+#         through='ReservedSeat',
+#         related_name='screen_times',
+#         related_query_name='screen_time',
+#     )
     # 예약 프로세스 진행 시 이미 예약된 좌석에 대한 정보 제공.
     # if reserved_seats : Auditorium(selected)에 소속된 Seat들 중,
     # ScreeningTime(selected).reserved_seats에 속하는 Seat들은
@@ -232,7 +241,7 @@ class ReservedSeat(models.Model):
         verbose_name_plural = f'{verbose_name} 목록'
         ordering = ['pk']
 
-    screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, related_name='selected_seats', verbose_name='상영시간')
+    screening_time = models.ForeignKey(Screening, on_delete=models.CASCADE, related_name='selected_seats', verbose_name='상영시간')
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE, verbose_name='좌석')
 
 
@@ -247,15 +256,15 @@ class Reservation(models.Model):
         ordering = ['pk']
 
     # 예매 유저
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매자', related_name='mappings', related_query_name='reservation')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매자', related_name='reservations', related_query_name='reservation')
     # 예매 영화
     # movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     # 예매 극장
     # theater = models.ForeignKey(Theater, on_delete=models.CASCADE)
-    # 예매 상영 정보(상영관)
+    # 예매 상영 정보(상영관), 상영 시간
     screening = models.ForeignKey(Screening, on_delete=models.CASCADE, blank=True, null=True, verbose_name='상영 예매')
     # 예매 상영 시간
-    screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매 시간')
+    # screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매 시간')
     # 예매 좌석 정보
     seat = models.ForeignKey(ReservedSeat, on_delete=models.CASCADE)
     # 결제 완료 시점(예매 시간)

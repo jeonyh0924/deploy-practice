@@ -49,20 +49,20 @@ class MovieAdmin(nested_admin.nested.NestedModelAdmin):
 
 
 # 상영 Admin setting
-class ScreeningTimeInline(nested_admin.nested.NestedTabularInline):
-    model = ScreeningTime
-    extra = 1
+# class ScreeningTimeInline(nested_admin.nested.NestedTabularInline):
+#     model = ScreeningTime
+#     extra = 1
 
 
-class ScreeningAdmin(nested_admin.nested.NestedModelAdmin):
-    inlines = [ScreeningTimeInline]
+# class ScreeningAdmin(nested_admin.nested.NestedModelAdmin):
+#     inlines = [ScreeningTimeInline]
 
 
 # 상영관 Admin setting
 class ScreeningInline(nested_admin.nested.NestedStackedInline):
     model = Screening
     extra = 1
-    inlines = [ScreeningTimeInline]
+    ordering = ('-time',)
 
 class SeatInline(nested_admin.nested.NestedTabularInline):
     model = Seat
@@ -79,8 +79,8 @@ class AuditoriumAdmin(nested_admin.nested.NestedModelAdmin):
                    )
 
     def get_movie(self, obj):
-        screenings = obj.screenings.all()
-        return [screening.movie for screening in screenings]
+        screening = obj.screenings.first()
+        return screening
 
 
 class AuditoriumInline(nested_admin.nested.NestedStackedInline):
@@ -109,13 +109,16 @@ class TheaterAdmin(nested_admin.nested.NestedModelAdmin):
 
 class ReservationAdmin(admin.ModelAdmin):
     model = Reservation
-    list_display = ('user', 'get_movie', 'get_theater', 'screening_time', 'get_seat', 'is_active')
+    list_display = ('user', 'get_movie', 'get_theater', 'get_seat', 'is_active')
 
     def get_movie(self, obj):
         return obj.screening.movie
 
     def get_theater(self, obj):
         return obj.screening.theater
+
+    def get_screening_time(self, obj):
+        return obj.screening.time
 
     def get_seat(self, obj):
         return obj.seat
