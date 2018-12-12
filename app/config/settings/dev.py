@@ -29,7 +29,7 @@ DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'
 # collectstatic 을 실행 했을 때,
 # 버킷의 'static'폴더 아래에 정적 파일들이 저장되도록 설정해보기
 # config.storages.StaticStorage 클래스 만들어서 적용
-# STATICFILES_STORAGE = 'config.storages.StaticStorage'
+STATICFILES_STORAGE = 'config.storages.StaticStorage'
 # 위 설정 시 S3 프리티어 기본 PUT 한계를 금방 초과하게 되므로
 # STATIC_ROOT에 collectstatic 후 Nginx 에서 제공하는 형태로 사용
 

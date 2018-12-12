@@ -6,7 +6,8 @@ import re
 import requests
 from datetime import datetime
 from config.settings.base import CHROME_DRIVER
-from reservations.models import Movie, Stillcut
+from mappings.models import Cast
+from mappings.models import Movie, Stillcut
 from selenium.common.exceptions import NoSuchElementException
 
 
@@ -33,7 +34,7 @@ for url in detail_urls:
             spec = driver.find_elements_by_css_selector('div.spec dd')
             clean_spec = [dd.text for dd in spec]
             director = clean_spec[0]
-            actor = clean_spec[2]
+            actor_list = re.split(',', clean_spec[2])
             genre = re.split(':', driver.find_elements_by_css_selector('div.spec dt')[2].text)[1]
             running_time = int(re.search(r'[0-9]+', clean_spec[4].split(',')[1]).group())
             opening_date = clean_spec[5]
@@ -46,13 +47,14 @@ for url in detail_urls:
             instance = Movie.objects.create(
                 title=title,
                 director=director,
-                cast=actor,
                 duration_min=running_time,
                 opening_date=datetime.strptime(opening_date, '%Y.%m.%d').date(),
                 description=story,
                 genre=genre,
                 main_img=main_image,
             )
+            for actor in actor_list:
+                Cast.objects.create(movie=instance, actor=actor)
             time.sleep(1)
             driver.find_elements_by_css_selector('ul.tab-menu li a')[2].click()
             time.sleep(2)
