@@ -131,4 +131,3 @@ class ReservedSeatsSerializer(serializers.ModelSerializer):
         fields = (
             'reserved_seats',
         )
-
