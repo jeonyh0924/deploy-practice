@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from mappings.models import Movie, Theater, Screening
 from mappings.serializers import MovieSerializer, MovieDetailSerializer, TheaterListSerializer, \
-    TheaterDetailSerializer
+    TheaterDetailSerializer,ReservedSeatsSerializer
 
 
 
@@ -70,4 +70,3 @@ class TheaterDetailView(APIView):
         theater = get_object_or_404(Theater, pk=pk)
         serializer = TheaterDetailSerializer(theater, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-

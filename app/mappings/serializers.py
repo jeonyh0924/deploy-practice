@@ -154,6 +154,16 @@ class ScreeningSerializer(serializers.ModelSerializer):
         return auditorium.seats_no - len(screening.reserved_seats.all())
 
 
+class ReservedSeatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Screening
+        fields = (
+            'movie',
+            'theater',
+            'auditorium',
+            'time',
+            'reserved_seats'
+        )
 
 
 class TheaterListSerializer(serializers.ModelSerializer):

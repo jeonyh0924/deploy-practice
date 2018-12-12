@@ -3,7 +3,6 @@ from mappings.models import Movie, Theater, Screening
 
 
 # Ticket Movie Serializer
-# from mappings.serializers import SeatsSerializer
 
 
 class TicketMovieSerializer(serializers.ModelSerializer):
@@ -124,10 +123,12 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
 
 
 class ReservedSeatsSerializer(serializers.ModelSerializer):
-    # reserved_seats = SeatsSerializer(many=True)
-
     class Meta:
         model = Screening
         fields = (
-            'reserved_seats',
+            'movie',
+            'auditorium',
+            'time',
+            'reserved_seats'
         )
+
