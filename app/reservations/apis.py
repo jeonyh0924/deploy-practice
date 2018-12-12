@@ -1,7 +1,9 @@
-from datetime import datetime
+# import datetime
+# from datetime import date
+import datetime
 import pytz
 from django.db.models import Q
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,10 +11,14 @@ from rest_framework.views import APIView
 # 예매 프로세스
 # 예매 필터링 API View
 from mappings.models import Screening, Movie, Theater
-from reservations.serializers import TicketMovieSerializer, TicketTheaterSerializer, TicketScreeningDateSerializer
+from reservations.serializers import TicketMovieSerializer, TicketScreeningDateTimeSerializer, \
+    TicketTheaterLocationSerializer
 
 
 class TicketFilteringView(APIView):
+    # permission_classes = (
+    #     permissions.IsAuthenticated,
+    # )
     def movie_filter(self, request):
         if request.GET.get('movie') is not None:
             movie = request.GET.get('movie')
@@ -37,7 +43,7 @@ class TicketFilteringView(APIView):
     def time_filter(self, request):
         if request.GET.get('time') is not None:
             raw_time = request.GET.get('time') + ' 00:00:00'
-            base_time = datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
+            base_time = datetime.datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
             max_time = (base_time + datetime.timedelta(hours=23, minutes=59, seconds=59)).replace(tzinfo=pytz.UTC)
 
             return Q(time__gt=base_time) & Q(time__lt=max_time)
@@ -46,41 +52,49 @@ class TicketFilteringView(APIView):
 
     def get(self, request):
         context = {}
-
         screens = Screening.objects.filter(self.movie_filter(request) & self.location_filter(request) & self.sub_location_filter(request) & self.time_filter(request))
 
-        # movie_list = [screen.movie for screen in screens]
-        movie_pk_list = [screen.movie.pk for screen in screens]
-        all_movie_list = Movie.objects.all()
-        # theater_list = [screen.theater for screen in screens]
-        theater_pk_list = [screen.theater.pk for screen in screens]
-        all_theater_list = Theater.objects.all()
-        # time_list = [screen.time for screen in screens]
-        # date_list = [{'date': time} for time in time_list]
-        screening_pk_list = [screen.pk for screen in screens]
-        all_screening_list = Screening.objects.all()
+        # Movie serializer
+        filter_movie_pk_list = [screen.movie.pk for screen in screens]
 
         movie_serializer = TicketMovieSerializer(
-            all_movie_list,
-            context={"selected": movie_pk_list},
+            Movie.objects.all(),
+            context={"show": filter_movie_pk_list},
             many=True
         )
         context["movie"] = movie_serializer.data
 
-        theater_serializer = TicketTheaterSerializer(
-            all_theater_list,
-            context={"selected": theater_pk_list},
-            many=True
-        )
-        context["theater"] = theater_serializer.data
+        # Theater serializer
+        filter_theater_pk_list = list(set([screen.theater.pk for screen in screens]))
+        location_set = list(set(theater.location for theater in Theater.objects.all()))
+        location_list = []
+        for location in location_set:
+            location_dict = {"location": location}
+            location_list.append(location_dict)
 
-        date_serializer = TicketScreeningDateSerializer(
-            all_screening_list,
-            context={"selected": screening_pk_list},
+        location_serializer = TicketTheaterLocationSerializer(
+            data=location_list,
+            context={"show": filter_theater_pk_list},
             many=True
         )
-        context["date"] = date_serializer.data
-        # date_serializer = TicketScreeningDateSerializer(data=date_list, many=True)
-            # context["date"] = date_serializer.validated_data
+        if location_serializer.is_valid():
+            context["theater"] = location_serializer.data
+
+        # DateTime serializer
+        filter_screening_pk_list = [screen.pk for screen in screens]
+        date_set = list(set([screen.time.date() for screen in Screening.objects.all()]))
+        date_list = []
+        for date in date_set:
+            date_dict = {"date": date}
+            date_list.append(date_dict)
+
+        date_serializer = TicketScreeningDateTimeSerializer(
+            data=date_list,
+            many=True,
+            context={"show": filter_screening_pk_list}
+        )
+        if date_serializer.is_valid():
+            context["date"] = date_serializer.data
+
         return Response(context, status=status.HTTP_200_OK)
 

@@ -1,85 +1,120 @@
-import pytz
-from django.conf import settings
-from django.utils import timezone
 from rest_framework import serializers
-
 from mappings.models import Movie, Theater, Screening
 
 
+# Ticket Movie Serializer
 class TicketMovieSerializer(serializers.ModelSerializer):
-    selected = serializers.SerializerMethodField()
+    show = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
         fields = (
             'pk',
             'title',
-            'selected'
+            'show'
         )
 
-    def get_selected(self, movie):
-        pk_list = self.context.get("selected")
+    def get_show(self, movie):
+        pk_list = self.context.get("show")
         if movie.pk in pk_list:
             return True
         else:
             return False
 
 
-class TicketTheaterSerializer(serializers.ModelSerializer):
-    selected = serializers.SerializerMethodField()
+# Ticket Theater Serializer
+class TicketTheaterSubLocationSerializer(serializers.ModelSerializer):
+    show = serializers.SerializerMethodField()
 
     class Meta:
         model = Theater
         fields = (
             'pk',
-            'location',
             'sub_location',
-            'selected'
+            'show'
         )
 
-    def get_selected(self, theater):
-        pk_list = self.context.get("selected")
+    def get_show(self, theater):
+        pk_list = self.context.get("show")
         if theater.pk in pk_list:
             return True
         else:
             return False
 
-class TicketScreeningDateSerializer(serializers.ModelSerializer):
-    selected = serializers.SerializerMethodField()
 
+class TicketTheaterLocationSerializer(serializers.Serializer):
+    location = serializers.CharField(max_length=64)
+
+    def to_representation(self, instance):
+        data = super(TicketTheaterLocationSerializer, self).to_representation(instance)
+        theater_by_filter = [theater for theater in Theater.objects.all()
+                             if theater.location == instance["location"]]
+        serializer = TicketTheaterSubLocationSerializer(
+            theater_by_filter,
+            many=True,
+            context={"show": self.context.get("show")}
+        )
+        num = {"num": len(serializer.data)}
+        return [data, {"theater_set": serializer.data}, num]
+
+
+
+# Ticket Screening DateTime Serializer
+class TicketScreeningTimeSerializer(serializers.ModelSerializer):
+    times = serializers.SerializerMethodField()
     class Meta:
         model = Screening
         fields = (
             'pk',
-            'time',
-            'selected'
+            'times',
         )
 
-    def get_selected(self, screening):
-        pk_list = self.context.get("selected")
-        if screening.pk in pk_list:
-            return True
+    def get_times(self, screening):
+        return screening.time.time()
+
+class TicketScreeningDateTimeSerializer(serializers.Serializer):
+    date = serializers.DateField()
+
+    # serializer.data 대신 validated_data를 쓴다면 to_internal_value로 데이터를 조작한다.
+    # def to_internal_value(self, data):
+    #     return data
+
+    # serializer.data 를 쓸 때에만 to_representation을 거쳐간다.
+    def to_representation(self, instance):
+        data = super(TicketScreeningDateTimeSerializer, self).to_representation(instance)
+        screening_by_filter = [screen for screen in Screening.objects.all()
+                               if screen.time.date() == instance["date"] and screen.pk in self.context.get("show")]
+        serializer = TicketScreeningTimeSerializer(screening_by_filter, many=True)
+        if serializer.data:
+            show = {"show": True}
         else:
-            return False
+            show = {"show": False}
+        return [data, {"time_set": serializer.data}, show]
 
-# class TicketDatetimeSerializer(serializers.Serializer):
-#     date = serializers.DateTimeField()
-
-
-
-# class TicketFilterSerializer(serializers.Serializer):
-#     def get_movie_list(self):
-#         movie_list = self.context.get('movie_list')
-#         return movie_list
+# class TicketLocationSerializer(serializers.ModelSerializer):
+#     nums = serializers.SerializerMethodField()
+#     theaters = serializers.SerializerMethodField()
 #
-#     def get_theater_list(self):
-#         theater_list = self.context.get('theater_list')
-#         return theater_list
+#     class Meta:
+#         model = Theater
+#         fields = (
+#             'location',
+#             'nums',
+#             'theaters'
+#         )
 #
-#     def get_date_list(self):
-#         date_list = self.context.get('date_list')
-#         return date_list
+#     def get_nums(self, theater):
+#         count = 0
+#         for pk in self.context.get("selected"):
+#             if theater.location == Theater.objects.get(pk=pk).location:
+#                 count += 1
+#         return count
 #
-#     movie_list = TicketMovieSerializer(get_movie_list, many=True)
-#     theater_list = TicketTheaterSerializer(get_theater_list, many=True)
-#     date_list = TicketDatetimeSerializer(get_date_list, many=True)
+#     def get_theaters(self, theater):
+#         theater_by_location = Theater.objects.filter(location=theater.location)
+#         serializers = TicketSubLocationSerializer(
+#             theater_by_location,
+#             context={"selected": self.context.get("selected")},
+#             many=True
+#         )
+#         return serializers.data

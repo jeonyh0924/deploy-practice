@@ -124,6 +124,15 @@ class ReservationAdmin(admin.ModelAdmin):
         return obj.seat
 
 
+class ScreeningAdmin(admin.ModelAdmin):
+    model = Screening
+    list_display = (
+        'movie',
+        'theater',
+        'auditorium',
+        'time'
+    )
+
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(Theater, TheaterAdmin)
 # admin.site.register(Stillcut)
@@ -131,5 +140,5 @@ admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Auditorium, AuditoriumAdmin)
 # admin.site.register(Seat)
 # admin.site.register(ReservedSeat)
-# admin.site.register(Screening, ScreeningAdmin)
+admin.site.register(Screening, ScreeningAdmin)
 # admin.site.register(ScreeningTime)
