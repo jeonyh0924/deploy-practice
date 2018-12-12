@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mappings.models import Movie, Stillcut, Cast, Screening, Theater, Auditorium, Seat, ScreeningTime
+from mappings.models import Movie, Stillcut, Cast, Screening, Theater, Auditorium, Seat
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -31,6 +31,7 @@ class MovieCompactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = (
+            'pk',
             'title',
             'now_show',
             'genre',
@@ -116,32 +117,41 @@ class AuditoriumSerializer(serializers.ModelSerializer):
         )
 
 
-class ScreeningTimeSerializer(serializers.ModelSerializer):
+# class ScreeningTimeSerializer(serializers.ModelSerializer):
+#     current_seats_no = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = ScreeningTime
+#         fields = (
+#             'time',
+#             'current_seats_no'
+#         )
+#
+#     def get_current_seats_no(self, screeningtime):
+#         auditorium = screeningtime.screening.auditorium
+#         return auditorium.seats_no - len(screeningtime.reserved_seats.all())
+
+
+
+class ScreeningSerializer(serializers.ModelSerializer):
+    auditorium = AuditoriumSerializer()
     current_seats_no = serializers.SerializerMethodField()
 
-    class Meta:
-        model = ScreeningTime
-        fields = (
-            'time',
-            'current_seats_no'
-        )
-
-    def get_current_seats_no(self, screeningtime):
-        auditorium = screeningtime.screening.auditorium
-        return auditorium.seats_no - len(screeningtime.reserved_seats.all())
-
-
-
-class ScreeningListSerializer(serializers.ModelSerializer):
-    auditorium = AuditoriumSerializer()
-    screening_times = ScreeningTimeSerializer(many=True)
+    # screening_times = ScreeningTimeSerializer(many=True)
 
     class Meta:
         model = Screening
         fields = (
+            'movie',
+            'theater',
             'auditorium',
-            'screening_times'
+            'time',
+            'current_seats_no'
         )
+
+    def get_current_seats_no(self, screening):
+        auditorium = screening.auditorium
+        return auditorium.seats_no - len(screening.reserved_seats.all())
 
 
 class TheaterListSerializer(serializers.ModelSerializer):
@@ -156,7 +166,7 @@ class TheaterListSerializer(serializers.ModelSerializer):
 
 class TheaterDetailSerializer(serializers.ModelSerializer):
     current_movies = MovieCompactSerializer(many=True)
-    screenings = ScreeningListSerializer(many=True)
+    screenings = ScreeningSerializer(many=True)
     all_auditoriums_no = serializers.SerializerMethodField()
     all_seats_no = serializers.SerializerMethodField()
 

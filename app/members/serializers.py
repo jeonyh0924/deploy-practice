@@ -28,8 +28,8 @@ class CheckUniqueIDSerializer(serializers.Serializer):
 # Facebook User Serializer
 class SocialAccountSerializer(serializers.Serializer):
     user_id = serializers.CharField()
-    last_name = serializers.CharField()
-    first_name = serializers.CharField()
+    last_name = serializers.CharField(allow_blank=True, allow_null=True)
+    first_name = serializers.CharField(allow_blank=True, allow_null=True)
     email = serializers.CharField(allow_blank=True, allow_null=True)
     phone_number = serializers.CharField(allow_blank=True, allow_null=True)
 
