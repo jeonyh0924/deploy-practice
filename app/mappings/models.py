@@ -235,7 +235,7 @@ class Screening(models.Model):
 # 생성된 예매 좌석 객체를 참조하여 Reservation 객체가 생성된다.
 class ReservedSeat(models.Model):
     def __str__(self):
-        return self.seat
+        return str(self.seat)
 
     class Meta:
         verbose_name = '예약 좌석'

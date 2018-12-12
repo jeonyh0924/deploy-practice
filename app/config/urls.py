@@ -21,6 +21,7 @@ from django.views.generic import RedirectView
 
 from members.urls import urlpatterns_api_members
 from mappings.urls import urlpatterns_api_movies, urlpatterns_api_theaters
+from reservations.urls import urlpatterns_api_tickets
 
 urlpatterns_api = ([
     path('members/', include(urlpatterns_api_members)),

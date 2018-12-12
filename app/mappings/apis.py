@@ -3,9 +3,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mappings.models import Movie, Theater
+from mappings.models import Movie, Theater, Screening
 from mappings.serializers import MovieSerializer, MovieDetailSerializer, TheaterListSerializer, \
-    TheaterDetailSerializer
+    TheaterDetailSerializer,ReservedSeatsSerializer
 
 
 
@@ -69,4 +69,13 @@ class TheaterDetailView(APIView):
     def get(self, request, pk):
         theater = get_object_or_404(Theater, pk=pk)
         serializer = TheaterDetailSerializer(theater, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# 상영 영화 좌석 예매 리스트 API View
+# 상영 pk를 받는다.
+class ReservedSeatsList(APIView):
+    def get(self, request, pk):
+        screening = get_object_or_404(Screening, pk=pk)
+        serializer = ReservedSeatsSerializer(screening, context={"requset": request})
         return Response(serializer.data, status=status.HTTP_200_OK)

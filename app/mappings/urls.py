@@ -11,3 +11,7 @@ urlpatterns_api_theaters = ([
   path('list/', apis.TheaterListView.as_view()),
   path('detail/<int:pk>/', apis.TheaterDetailView.as_view()),
 ], 'theaters')
+
+urlpatterns_api_screening = ([
+  path('reserved/<int:pk>', apis.ReservedSeatsList.as_view()),
+], 'screening')

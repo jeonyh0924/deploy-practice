@@ -4,6 +4,7 @@ import datetime
 import pytz
 from django.db.models import Q
 from rest_framework import status, permissions
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,7 +13,7 @@ from rest_framework.views import APIView
 # 예매 필터링 API View
 from mappings.models import Screening, Movie, Theater
 from reservations.serializers import TicketMovieSerializer, TicketScreeningDateTimeSerializer, \
-    TicketTheaterLocationSerializer
+    TicketTheaterLocationSerializer, ReservedSeatsSerializer
 
 
 class TicketFilteringView(APIView):
@@ -98,3 +99,11 @@ class TicketFilteringView(APIView):
 
         return Response(context, status=status.HTTP_200_OK)
 
+
+# 상영 영화 좌석 예매 리스트 API View
+# 상영 pk를 받는다.
+class ReservedSeatsList(APIView):
+    def get(self, request, pk):
+        screening = get_object_or_404(Screening, pk=pk)
+        serializer = ReservedSeatsSerializer(screening, context={"requset": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
