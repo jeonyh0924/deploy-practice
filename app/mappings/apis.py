@@ -1,3 +1,5 @@
+import string
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
@@ -11,14 +13,15 @@ from mappings.serializers import MovieSerializer, MovieDetailSerializer, Theater
 
 
 # Seat bulk create code
-
+# alphabet = string.ascii_uppercase
+#
 # theater_list = Theater.objects.all()
 # auditorium_list = [theater.auditoriums.all() for theater in theater_list]
 # for auditorium_set in auditorium_list:
 #     for auditorium in auditorium_set:
 #         for row in range(1,11):
 #             for number in range(1,11):
-#                 auditorium.seats.create(row=row, number=number)
+#                 auditorium.seats.create(row=row, number=number, seat_name=f'{alphabet[row-1]}' + f'{number}')
 
 
 # 영화 기본 정보 리스트 API View

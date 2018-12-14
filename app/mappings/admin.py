@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib import admin
 import nested_admin
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.utils import timezone
 from nested_admin.nested import NestedModelAdmin
@@ -20,27 +21,43 @@ class StillcutInline(nested_admin.nested.NestedStackedInline):
     extra = 1
 
 
-class CastInline(nested_admin.nested.NestedStackedInline):
-    model = Cast
+class CastingInline(nested_admin.nested.NestedStackedInline):
+    model = Casting
+    extra = 1
+
+
+class DirectingInline(nested_admin.nested.NestedStackedInline):
+    model = Directing
     extra = 1
 
 
 class MovieAdmin(nested_admin.nested.NestedModelAdmin):
-    def now_show_update(modeladmin, request, queryset):
+    def now_open_update(modeladmin, request, queryset):
         for movie in queryset:
             if movie.opening_date <= datetime.date.today():
-                movie.now_show = True
+                movie.now_open = True
                 movie.save()
 
+    def now_show_update(modeladmin, request, queryset):
+        for movie in queryset:
+            if movie.screenings.first():
+                movie.now_show = True
+                movie.save()
+            else:
+                movie.now_show = False
+                movie.save()
+
+    now_open_update.short_description = "현재 개봉작 업데이트"
     now_show_update.short_description = "현재 상영작 업데이트"
 
     list_display = ['title']
     list_filter = (
         'genre',
+        'now_open',
         'now_show',
     )
-    inlines = [CastInline, StillcutInline]
-    actions = [now_show_update]
+    inlines = [DirectingInline, CastingInline, StillcutInline]
+    actions = [now_show_update, now_open_update]
 
     def save_model(self, request, obj, form, change):
         super(MovieAdmin, self).save_model(request, obj, form, change)
@@ -133,6 +150,8 @@ class ScreeningAdmin(admin.ModelAdmin):
         'time'
     )
 
+
+
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(Theater, TheaterAdmin)
 # admin.site.register(Stillcut)
@@ -142,3 +161,7 @@ admin.site.register(Auditorium, AuditoriumAdmin)
 # admin.site.register(ReservedSeat)
 admin.site.register(Screening, ScreeningAdmin)
 # admin.site.register(ScreeningTime)
+admin.site.register(Cast)
+admin.site.register(Casting)
+admin.site.register(Director)
+admin.site.register(Directing)

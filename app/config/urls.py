@@ -17,19 +17,23 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import RedirectView
 
+from containers.apis import *
 from members.urls import urlpatterns_api_members
 from mappings.urls import urlpatterns_api_movies, urlpatterns_api_theaters
+from reservations.urls import urlpatterns_api_tickets
 
 urlpatterns_api = ([
     path('members/', include(urlpatterns_api_members)),
     path('movies/', include(urlpatterns_api_movies)),
-    path('theaters/', include(urlpatterns_api_theaters))
+    path('theaters/', include(urlpatterns_api_theaters)),
+    path('tickets/', include(urlpatterns_api_tickets)),
 ], 'api')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', WebHomeView.as_view()),
+    path('m/', AppHomeView.as_view()),
     path('api/', include(urlpatterns_api)),
     # 관리자 페이지 nested inline 구현 위한 url
     path('nested_admin/', include('nested_admin.urls')),

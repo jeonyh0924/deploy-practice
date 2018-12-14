@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 # 예매 필터링 API View
 from mappings.models import Screening, Movie, Theater
 from reservations.serializers import TicketMovieSerializer, TicketScreeningDateTimeSerializer, \
-    TicketTheaterLocationSerializer
+    TicketTheaterLocationSerializer, SeatSerializer
 
 
 class TicketFilteringView(APIView):
@@ -98,3 +98,11 @@ class TicketFilteringView(APIView):
 
         return Response(context, status=status.HTTP_200_OK)
 
+
+class TicketSeatListView(APIView):
+    def get(self, request, pk):
+        screen = Screening.objects.get(pk=pk).auditorium
+        auditorium = screen.auditorium
+        reserved_pk_list = [seat.pk for seat in screen.reserved_seats.all()]
+        serializer = SeatSerializer(auditorium.seats.all(), many=True, context={"reserved_seats": reserved_pk_list})
+        return Response(serializer.data, status=status.HTTP_200_OK)
