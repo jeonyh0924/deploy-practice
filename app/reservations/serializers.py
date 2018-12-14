@@ -2,7 +2,6 @@ from rest_framework import serializers
 from mappings.models import Movie, Theater, Screening, Seat
 
 # Ticket Movie Serializer
-from mappings.serializers import SeatSeralizer, MovienameSeralizer
 
 
 class TicketMovieSerializer(serializers.ModelSerializer):
@@ -121,21 +120,7 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
 #         )
 #         return serializers.data
 
-# 해당하는 상영관의 영화와 시간대 예약 좌석을 알려준다.
-class ReservedSeatsSerializer(serializers.ModelSerializer):
-    reserved_seats = SeatSeralizer(many=True)
-    movie = MovienameSeralizer()
-    class Meta:
-        model = Screening
-        fields = (
-            'auditorium',
-            'movie',
-            'time',
-            'reserved_seats',
-        )
 
-
-# 해보자 일단
 class SeatSerializer(serializers.ModelSerializer):
     reservation_check = serializers.SerializerMethodField()
 
