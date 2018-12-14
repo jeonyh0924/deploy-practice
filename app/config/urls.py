@@ -31,6 +31,7 @@ urlpatterns_api = ([
 ], 'api')
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
     path('', WebHomeView.as_view()),
     path('m/', AppHomeView.as_view()),

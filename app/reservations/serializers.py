@@ -3,6 +3,9 @@ from mappings.models import Movie, Theater, Screening, Seat
 
 
 # Ticket Movie Serializer
+from mappings.serializers import SeatSeralizer, MovienameSeralizer
+
+
 class TicketMovieSerializer(serializers.ModelSerializer):
     show = serializers.SerializerMethodField()
 
@@ -99,7 +102,6 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
         else:
             show = {"show": False}
         return [data, {"time_set": serializer.data}, show]
-
 
 class SeatSerializer(serializers.ModelSerializer):
     reservation_check = serializers.SerializerMethodField()

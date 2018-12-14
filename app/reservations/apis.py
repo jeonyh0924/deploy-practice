@@ -4,6 +4,7 @@ import datetime
 import pytz
 from django.db.models import Q
 from rest_framework import status, permissions
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -99,6 +100,8 @@ class TicketFilteringView(APIView):
         return Response(context, status=status.HTTP_200_OK)
 
 
+# 상영 영화 좌석 예매 리스트 API View
+# 상영 pk를 받는다.
 class TicketSeatListView(APIView):
     def get(self, request, pk):
         screen = Screening.objects.get(pk=pk).auditorium
@@ -106,3 +109,6 @@ class TicketSeatListView(APIView):
         reserved_pk_list = [seat.pk for seat in screen.reserved_seats.all()]
         serializer = SeatSerializer(auditorium.seats.all(), many=True, context={"reserved_seats": reserved_pk_list})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+

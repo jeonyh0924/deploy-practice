@@ -59,7 +59,7 @@ class Movie(models.Model):
     # 영화 장르
     genre = models.CharField(max_length=32, blank=True, null=True, verbose_name='장르')
     # 영화 줄거리
-    description = models.TextField(max_length=512, blank=True, null=True, verbose_name='줄거리')
+    description = models.TextField(max_length=1024, blank=True, null=True, verbose_name='줄거리')
     # 트레일러
     trailer = models.URLField(default='', blank=True, null=True, verbose_name='트레일러')
     # 예매율
@@ -243,7 +243,7 @@ class Screening(models.Model):
 # 생성된 예매 좌석 객체를 참조하여 Reservation 객체가 생성된다.
 class ReservedSeat(models.Model):
     def __str__(self):
-        return self.seat
+        return str(self.seat)
 
     class Meta:
         verbose_name = '예약 좌석'

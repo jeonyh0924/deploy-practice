@@ -25,7 +25,6 @@ class CheckUniqueIDSerializer(serializers.Serializer):
     username = serializers.CharField()
 
 
-
 # Facebook User Serializer
 class SocialAccountSerializer(serializers.Serializer):
     user_id = serializers.CharField()
