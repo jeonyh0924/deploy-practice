@@ -203,3 +203,27 @@ class TheaterDetailSerializer(serializers.ModelSerializer):
             all_seats_no += auditorium.seats_no
         return all_seats_no
 
+
+class SeatSeralizer(serializers.ModelSerializer):
+    # reservation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Seat
+        fields = (
+            'row',
+            'number',
+            # 'auditorium',
+            # 'reservation_check'
+            # 이걸 메서드 필드로 만고
+        )
+
+    def get_reservation_check(self, seat):
+        pass
+
+
+class MovienameSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = (
+            'title',
+        )

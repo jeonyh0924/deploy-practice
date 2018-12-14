@@ -129,3 +129,14 @@ class LogoutView(APIView):
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class UserDeleteView(APIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    def get(self, request):
+        request.user.auth_token.delete()
+        request.user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

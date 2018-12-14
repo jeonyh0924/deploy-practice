@@ -162,8 +162,6 @@ class Seat(models.Model):
     number = models.IntegerField(verbose_name='열')
     # 배치 상영관
     auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE, verbose_name='배치 상영관', related_name='seats')
-    # 예매 여부
-    # reservation_check = models.BooleanField(verbose_name='예매 여부')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
