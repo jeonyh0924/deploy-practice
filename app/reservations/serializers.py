@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from mappings.models import Movie, Theater, Screening, Seat
 
+
 # Ticket Movie Serializer
 
 
@@ -11,6 +12,7 @@ class TicketMovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = (
             'pk',
+            'age',
             'title',
             'show'
         )
@@ -59,19 +61,27 @@ class TicketTheaterLocationSerializer(serializers.Serializer):
         return [data, {"theater_set": serializer.data}, num]
 
 
-
 # Ticket Screening DateTime Serializer
 class TicketScreeningTimeSerializer(serializers.ModelSerializer):
     times = serializers.SerializerMethodField()
+    current_seats_no = serializers.SerializerMethodField()
+
     class Meta:
         model = Screening
         fields = (
             'pk',
+            'auditorium',
             'times',
+            'current_seats_no'
         )
 
     def get_times(self, screening):
         return screening.time.time()
+
+    def get_current_seats_no(self, screening):
+        auditorium = screening.auditorium
+        return auditorium.seats_no - len(screening.reserved_seats.all())
+
 
 class TicketScreeningDateTimeSerializer(serializers.Serializer):
     date = serializers.DateField()
@@ -92,34 +102,6 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
             show = {"show": False}
         return [data, {"time_set": serializer.data}, show]
 
-# class TicketLocationSerializer(serializers.ModelSerializer):
-#     nums = serializers.SerializerMethodField()
-#     theaters = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Theater
-#         fields = (
-#             'location',
-#             'nums',
-#             'theaters'
-#         )
-#
-#     def get_nums(self, theater):
-#         count = 0
-#         for pk in self.context.get("selected"):
-#             if theater.location == Theater.objects.get(pk=pk).location:
-#                 count += 1
-#         return count
-#
-#     def get_theaters(self, theater):
-#         theater_by_location = Theater.objects.filter(location=theater.location)
-#         serializers = TicketSubLocationSerializer(
-#             theater_by_location,
-#             context={"selected": self.context.get("selected")},
-#             many=True
-#         )
-#         return serializers.data
-
 
 class SeatSerializer(serializers.ModelSerializer):
     reservation_check = serializers.SerializerMethodField()
@@ -130,12 +112,11 @@ class SeatSerializer(serializers.ModelSerializer):
             'pk',
             'row',
             'number',
+            'seat_name',
             'reservation_check'
         )
 
     def get_reservation_check(self, seat):
-        # self 는 serializer
-        # seat는 들어온 인스턴스
         pk_list = self.context.get("reserved_seats")
         if seat.pk in pk_list:
             return True

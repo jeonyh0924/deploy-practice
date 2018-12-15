@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mappings.models import Movie, Stillcut, Cast, Screening, Theater, Auditorium, Seat
+from mappings.models import Movie, Stillcut, Cast, Screening, Theater, Auditorium, Seat, Director
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -10,10 +10,12 @@ class MovieSerializer(serializers.ModelSerializer):
         fields = (
             'pk',
             'title',
+            'age',
             'reservation_score',
             'main_img_url',
-            'now_show',
-            'opening_date'
+            'opening_date',
+            'now_open',
+            'now_show'
         )
 
     def get_main_img_url(self, movie):
@@ -25,7 +27,7 @@ class MovieSerializer(serializers.ModelSerializer):
             return ""
 
 
-class MovieCompactSerializer(serializers.ModelSerializer):
+class TheaterMovieSerializer(serializers.ModelSerializer):
     main_img_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -33,10 +35,12 @@ class MovieCompactSerializer(serializers.ModelSerializer):
         fields = (
             'pk',
             'title',
-            'now_show',
+            'age',
+            'now_open',
             'genre',
             'duration_min',
             'opening_date',
+            'now_show',
             'main_img_url',
         )
 
@@ -69,27 +73,62 @@ class StillcutSerializer(serializers.ModelSerializer):
 
 
 class CastSerializer(serializers.ModelSerializer):
+    profile_img_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Cast
         fields = (
-            # 'movie',
             'actor',
+            'eng_actor',
+            'profile_img'
         )
+
+    def get_profile_img_url(self, cast):
+        request = self.context.get('request')
+        try:
+            cast_img_url = cast.profile_img.url
+            return request.build_absolute_uri(cast_img_url)
+        except AttributeError:
+            return ""
+
+
+class DirectorSerializer(serializers.ModelSerializer):
+    profile_img_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Director
+        fields = (
+            'director',
+            'eng_director',
+            'profile_img'
+        )
+
+    def get_profile_img_url(self, director):
+        request = self.context.get('request')
+        try:
+            director_img_url = director.profile_img.url
+            return request.build_absolute_uri(director_img_url)
+        except AttributeError:
+            return ""
 
 
 class MovieDetailSerializer(serializers.ModelSerializer):
     stillcuts = StillcutSerializer(many=True)
     casts = CastSerializer(many=True)
+    directors = DirectorSerializer()
     main_img_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Movie
         fields = (
             'pk',
             'title',
-            'director',
+            'age',
+            'directors',
             'casts',
             'duration_min',
             'opening_date',
+            'now_open',
             'genre',
             'description',
             'trailer',
@@ -115,22 +154,6 @@ class AuditoriumSerializer(serializers.ModelSerializer):
             'name',
             'seats_no',
         )
-
-
-# class ScreeningTimeSerializer(serializers.ModelSerializer):
-#     current_seats_no = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = ScreeningTime
-#         fields = (
-#             'time',
-#             'current_seats_no'
-#         )
-#
-#     def get_current_seats_no(self, screeningtime):
-#         auditorium = screeningtime.screening.auditorium
-#         return auditorium.seats_no - len(screeningtime.reserved_seats.all())
-
 
 
 class ScreeningSerializer(serializers.ModelSerializer):
@@ -177,7 +200,7 @@ class TheaterListSerializer(serializers.ModelSerializer):
 
 
 class TheaterDetailSerializer(serializers.ModelSerializer):
-    current_movies = MovieCompactSerializer(many=True)
+    current_movies = TheaterMovieSerializer(many=True)
     screenings = ScreeningSerializer(many=True)
     all_auditoriums_no = serializers.SerializerMethodField()
     all_seats_no = serializers.SerializerMethodField()

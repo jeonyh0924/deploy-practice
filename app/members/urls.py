@@ -9,5 +9,6 @@ urlpatterns_api_members = ([
   path('logout/', apis.LogoutView.as_view()),
   path('checkID/', apis.CheckUniqueIDView.as_view()),
   path('user-list/', apis.UserListView.as_view()),
+  path('check-password/', apis.CheckPasswordView.as_view()),
   path('user-delete/', apis.UserDeleteView.as_view()),
 ], 'members')

@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model, authenticate
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from rest_framework import status, permissions, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -81,6 +83,18 @@ class SocialAuthTokenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CheckPasswordView(APIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    def post(self, request):
+        if request.user.check_password(request.POST["password"]):
+            return Response({'message': '인증에 성공했습니다.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': '인증에 실패했습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 # User Profile APIView
 # Profile이므로 Username은 변경 불가로,
 # Password는 ********로 표시하도록 한다.
@@ -131,6 +145,7 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
 
 
+# 회원 탈퇴
 class UserDeleteView(APIView):
     permission_classes = (
         permissions.IsAuthenticated,

@@ -102,10 +102,11 @@ class TicketFilteringView(APIView):
 
 class TicketSeatListView(APIView):
     def get(self, request, pk):
-        screen = Screening.objects.get(pk=pk)
+        screen = Screening.objects.get(pk=pk).auditorium
         auditorium = screen.auditorium
-        seatlist = auditorium.seats.all()
-        reserved_seats = screen.reserved_seats.all()
-        reserved_pk_list = [seat.pk for seat in reserved_seats]
-        serializer = SeatSerializer(seatlist, many=True, context={"reserved_seats": reserved_pk_list})
+        reserved_pk_list = [seat.pk for seat in screen.reserved_seats.all()]
+        serializer = SeatSerializer(auditorium.seats.all(), many=True, context={"reserved_seats": reserved_pk_list})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
