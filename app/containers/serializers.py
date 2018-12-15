@@ -18,7 +18,7 @@ class MainContainerSerializer(serializers.ModelSerializer):
     def get_container_img_url(self, container):
         request = self.context.get("request")
         try:
-            container_img_url = container.profile_img.url
+            container_img_url = container.container_img.url
             return request.build_absolute_uri(container_img_url)
         except AttributeError:
             return ""
@@ -47,8 +47,8 @@ class WebTrailerSerializer(serializers.ModelSerializer):
     def get_posting_img_url(self, container):
         request = self.context.get("request")
         try:
-            container_img_url = container.profile_img.url
-            return request.build_absolute_uri(container_img_url)
+            posting_img_url = container.posting_img.url
+            return request.build_absolute_uri(posting_img_url)
         except AttributeError:
             return ""
 
@@ -76,8 +76,8 @@ class AppTrailerSerializer(serializers.ModelSerializer):
     def get_posting_img_url(self, container):
         request = self.context.get("request")
         try:
-            container_img_url = container.profile_img.url
-            return request.build_absolute_uri(container_img_url)
+            posting_img_url = container.posting_img.url
+            return request.build_absolute_uri(posting_img_url)
         except AttributeError:
             return ""
 
@@ -96,7 +96,7 @@ class EventContainerSerializer(serializers.ModelSerializer):
     def get_container_img_url(self, container):
         request = self.context.get("request")
         try:
-            container_img_url = container.profile_img.url
+            container_img_url = container.container_img.url
             return request.build_absolute_uri(container_img_url)
         except AttributeError:
             return ""
@@ -116,7 +116,7 @@ class EventFooterContainerSerializer(serializers.ModelSerializer):
     def get_container_img_url(self, container):
         request = self.context.get("request")
         try:
-            container_img_url = container.profile_img.url
+            container_img_url = container.container_img.url
             return request.build_absolute_uri(container_img_url)
         except AttributeError:
             return ""

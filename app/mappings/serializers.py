@@ -1,10 +1,11 @@
 from rest_framework import serializers
 
-from mappings.models import Movie, Stillcut, Cast, Screening, Theater, Auditorium, Seat, Director
+from mappings.models import Movie, Stillcut, Cast, Screening, Theater, Auditorium, Seat, Director, ReservedSeat
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    main_img_url = serializers.SerializerMethodField()
+    thumb_img_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Movie
         fields = (
@@ -12,23 +13,23 @@ class MovieSerializer(serializers.ModelSerializer):
             'title',
             'age',
             'reservation_score',
-            'main_img_url',
+            'thumb_img_url',
             'opening_date',
             'now_open',
             'now_show'
         )
 
-    def get_main_img_url(self, movie):
+    def get_thumb_img_url(self, movie):
         request = self.context.get('request')
         try:
-            main_img_url = movie.main_img.url
-            return request.build_absolute_uri(main_img_url)
+            thumb_img_url = movie.thumbnail_img.url
+            return request.build_absolute_uri(thumb_img_url)
         except AttributeError:
             return ""
 
 
 class TheaterMovieSerializer(serializers.ModelSerializer):
-    main_img_url = serializers.SerializerMethodField()
+    thumb_img_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
@@ -41,14 +42,14 @@ class TheaterMovieSerializer(serializers.ModelSerializer):
             'duration_min',
             'opening_date',
             'now_show',
-            'main_img_url',
+            'thumb_img_url'
         )
 
-    def get_main_img_url(self, movie):
+    def get_thumb_img_url(self, movie):
         request = self.context.get('request')
         try:
-            main_img_url = movie.main_img.url
-            return request.build_absolute_uri(main_img_url)
+            thumb_img_url = movie.thumbnail_img.url
+            return request.build_absolute_uri(thumb_img_url)
         except AttributeError:
             return ""
 
@@ -117,6 +118,8 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     casts = CastSerializer(many=True)
     directors = DirectorSerializer()
     main_img_url = serializers.SerializerMethodField()
+    thumb_img_url = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Movie
@@ -135,6 +138,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
             'reservation_score',
             'now_show',
             'main_img_url',
+            'thumb_img_url',
             'stillcuts',
         )
 
@@ -143,6 +147,14 @@ class MovieDetailSerializer(serializers.ModelSerializer):
         try:
             main_img_url = movie.main_img.url
             return request.build_absolute_uri(main_img_url)
+        except AttributeError:
+            return ""
+
+    def get_thumb_img_url(self, movie):
+        request = self.context.get('request')
+        try:
+            thumb_img_url = movie.thumbnail_img.url
+            return request.build_absolute_uri(thumb_img_url)
         except AttributeError:
             return ""
 
@@ -177,7 +189,7 @@ class ScreeningSerializer(serializers.ModelSerializer):
         return auditorium.seats_no - len(screening.reserved_seats.all())
 
 
-class ReservedSeatsSerializer(serializers.ModelSerializer):
+class ScreenReservedSeatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Screening
         fields = (
@@ -226,3 +238,24 @@ class TheaterDetailSerializer(serializers.ModelSerializer):
             all_seats_no += auditorium.seats_no
         return all_seats_no
 
+
+class SeatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seat
+        fields = (
+            'row',
+            'number',
+            'seat_name'
+        )
+
+
+class ReservedSeatSerializer(serializers.ModelSerializer):
+    seat_name = serializers.SerializerMethodField()
+    class Meta:
+        model = ReservedSeat
+        fields = (
+            'seat_name',
+        )
+
+    def get_seat_name(self, seat):
+        return seat.seat.seat_name

@@ -1,4 +1,6 @@
 import imghdr
+
+# from PIL import Image
 from django.core.files.uploadedfile import SimpleUploadedFile
 from selenium import webdriver
 import time
@@ -51,6 +53,9 @@ for url in detail_urls:
             img_data = img_response.content
             ext = imghdr.what('', h=img_data)
             main_image = SimpleUploadedFile(f'{title}.{ext}', img_data)
+            # thumbnail = Image.open(main_image)
+            # image_generator = Thumbnail(source=thumbnail)
+            # thumbnail_image = image_generator.generate()
 
             movie_instance = Movie.objects.create(
                 title=title,
@@ -61,6 +66,7 @@ for url in detail_urls:
                 opening_date=datetime.strptime(opening_date, '%Y.%m.%d').date(),
                 description=story,
                 main_img=main_image,
+                # thumbnail_img=thumbnail_image,
             )
 
             driver.find_elements_by_css_selector('ul.tab-menu li a')[2].click()

@@ -126,7 +126,7 @@ class TheaterAdmin(nested_admin.nested.NestedModelAdmin):
 
 class ReservationAdmin(admin.ModelAdmin):
     model = Reservation
-    list_display = ('user', 'get_movie', 'get_theater', 'get_seat', 'is_active')
+    list_display = ('user', 'pk', 'get_movie', 'get_theater', 'get_seat', 'is_active')
 
     def get_movie(self, obj):
         return obj.screening.movie
@@ -138,7 +138,7 @@ class ReservationAdmin(admin.ModelAdmin):
         return obj.screening.time
 
     def get_seat(self, obj):
-        return obj.seat
+        return obj.seats_reserved.all()
 
 
 class ScreeningAdmin(admin.ModelAdmin):

@@ -1,9 +1,9 @@
-import re
-
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
 from django.db.models import Q
+from imagekit import ImageSpec
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 User = get_user_model()
 
@@ -32,6 +32,13 @@ def director_directory_path(instance, filename):
 def cast_directory_path(instance, filename):
     directory = instance.actor
     return f'{directory}/{filename}'
+
+
+# Thumbnail generator
+class Thumbnail(ImageSpec):
+    processors = [ResizeToFill(400, 560)]
+    format = 'JPEG'
+    options = {'quality': 80}
 
 
 # 영화(Movie) 객체 모델
@@ -70,7 +77,19 @@ class Movie(models.Model):
     now_show = models.BooleanField(default=False, blank=True, null=True, verbose_name='상영 여부')
     # 영화 메인 포스터
     main_img = models.ImageField(upload_to=movie_directory_path, blank=True, null=True, verbose_name='메인 포스터')
+    # 썸네일 이미지
+    thumbnail_img = ImageSpecField(
+        source='main_img',
+        processors=[ResizeToFill(400, 560)],
+        format='JPEG',
+        options={'quality': 80}
+    )
 
+    # def save(self, force_insert=False, force_update=False, using=None,
+    #          update_fields=None):
+    #     super(Seat, self).save()
+    #     self.auditorium.seats_no = len(Seat.objects.filter(auditorium=self.auditorium))
+    #     self.auditorium.save()
 
 # 감독
 class Director(models.Model):
@@ -239,21 +258,6 @@ class Screening(models.Model):
     )
 
 
-# 예매된 좌석. 선택한 좌석의 pk가 전달되면 해당 좌석을 참조하고, 앞서 선택한 상영시간을 참조하는 예매 좌석 객체를 생성한다.
-# 생성된 예매 좌석 객체를 참조하여 Reservation 객체가 생성된다.
-class ReservedSeat(models.Model):
-    def __str__(self):
-        return str(self.seat)
-
-    class Meta:
-        verbose_name = '예약 좌석'
-        verbose_name_plural = f'{verbose_name} 목록'
-        ordering = ['pk']
-
-    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, related_name='selected_seats', verbose_name='상영시간')
-    seat = models.ForeignKey(Seat, on_delete=models.CASCADE, verbose_name='좌석')
-
-
 # 예매(Reservation) 객체 모델
 class Reservation(models.Model):
     def __str__(self):
@@ -271,23 +275,41 @@ class Reservation(models.Model):
     # 예매 상영 시간
     # screening_time = models.ForeignKey(ScreeningTime, on_delete=models.CASCADE, blank=True, null=True, verbose_name='예매 시간')
     # 예매 좌석 정보
-    seat = models.ForeignKey(ReservedSeat, on_delete=models.CASCADE)
+    # seat = models.ForeignKey(ReservedSeat, on_delete=models.CASCADE)
     # 결제 완료 시점(예매 시간)
     # created_at = models.DateTimeField(auto_now_add=True)
     # 취소 여부 확인
     is_active = models.BooleanField(default=True, verbose_name='활성화')
+    get_paid = models.BooleanField(default=True, verbose_name='결제 여부')
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        super(Reservation, self).save()
+    # def save(self, force_insert=False, force_update=False, using=None,
+             # update_fields=None):
+        # Instance = self.screening
+        # movie = Instance.movie
+        # movie.reservation_score = len(Reservation.objects.filter(Q(movie=movie) & Q(is_active=True))) / len(
+        #     Reservation.objects.filter(is_active=True))
+        # movie.save()
+        # super(Reservation, self).save()
         # 예매 취소(is_active = False) 전환 시에도 아래 예매율 변동 처리를 넣을 것.
-        Instance = self.screening.movie
-        active_reservations = Reservation.objects.filter(is_active=True)
-        Instance.reservation_score = len(active_reservations.objects.filter(movie=Instance)) / len(active_reservations)
-        Instance.save()
 
 
 # 이후 reservation_type (ex) 청소년, 일반 ...)을 추가할 수 있다.
 # 이 경우는 Reservation에 reservation_type 필드를 추가하고,
 # class Reservation_Type(models.Model)을 추가한다.
 # Charfield + Choice_Set을 구성한다.(or CHOICE FIELD를 사용)
+
+
+# 예매된 좌석. 선택한 좌석의 pk가 전달되면 해당 좌석을 참조하고, 앞서 선택한 상영시간을 참조하는 예매 좌석 객체를 생성한다.
+# 생성된 예매 좌석 객체를 참조하여 Reservation 객체가 생성된다.
+class ReservedSeat(models.Model):
+    def __str__(self):
+        return str(self.seat)
+
+    class Meta:
+        verbose_name = '예약 좌석'
+        verbose_name_plural = f'{verbose_name} 목록'
+        ordering = ['pk']
+
+    screening = models.ForeignKey(Screening, on_delete=models.CASCADE, verbose_name='상영시간')
+    seat = models.ForeignKey(Seat, on_delete=models.CASCADE, verbose_name='좌석')
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='seats_reserved', verbose_name='예매')

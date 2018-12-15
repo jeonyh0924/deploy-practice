@@ -1,13 +1,12 @@
 from django.contrib.auth import get_user_model, authenticate
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
 from rest_framework import status, permissions, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
 
-from .serializers import UserSerializer, SocialAccountSerializer, CheckUniqueIDSerializer
+from mappings.models import Reservation
+from .serializers import UserSerializer, SocialAccountSerializer, CheckUniqueIDSerializer, ReservationSerializer
 # from rest_framework.authtoken.serializers import AuthCustomTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -134,7 +133,7 @@ class LogoutView(APIView):
     GET 요청으로 로그아웃 요청을 받는다
     해당 유저(request.user)가 가진 auth_token(Token object의 related_name)을 삭제
     """
-    def get(self, request):
+    def delete(self, request):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
@@ -151,7 +150,33 @@ class UserDeleteView(APIView):
         permissions.IsAuthenticated,
     )
 
-    def get(self, request):
+    def delete(self, request):
         request.user.auth_token.delete()
         request.user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# 예매 내역 조회
+class UserReservationView(APIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    def get(self, request, pk=None):
+        try:
+            reservation_list = Reservation.objects.filter(user=request.user)
+            serializers = ReservationSerializer(reservation_list, many=True, context={"request": request})
+            return Response(serializers.data, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return Response({"message": "예매 내역이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk=None):
+        reservation = get_object_or_404(Reservation, pk=pk)
+        reservation.is_active = False
+        reservation.save()
+        for seat in reservation.seats_reserved.all():
+            seat.delete()
+        serializers = ReservationSerializer(reservation, context={"request": request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+

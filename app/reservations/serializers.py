@@ -1,9 +1,11 @@
+from datetime import datetime
+
 from rest_framework import serializers
-from mappings.models import Movie, Theater, Screening, Seat
+from mappings.models import Movie, Theater, Screening, Seat, Reservation
+from mappings.serializers import SeatSerializer, ReservedSeatSerializer
 
 
 # Ticket Movie Serializer
-from mappings.serializers import SeatSeralizer, MovienameSeralizer
 
 
 class TicketMovieSerializer(serializers.ModelSerializer):
@@ -103,7 +105,7 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
             show = {"show": False}
         return [data, {"time_set": serializer.data}, show]
 
-class SeatSerializer(serializers.ModelSerializer):
+class TicketSeatSerializer(serializers.ModelSerializer):
     reservation_check = serializers.SerializerMethodField()
 
     class Meta:
@@ -122,3 +124,51 @@ class SeatSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+
+
+class TicketReservationSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    screening_set = serializers.SerializerMethodField()
+    seats_reserved = ReservedSeatSerializer(many=True)
+    num = serializers.SerializerMethodField()
+
+    # 여기서 return된 pk는 "예매번호" 로 사용할 수 있도록 한다.
+    class Meta:
+        model = Reservation
+        fields = (
+            'pk',
+            'user',
+            'screening_set',
+            'num',
+            'seats_reserved',
+            'is_active',
+        )
+        read_only_fields = (
+            'user',
+        )
+
+    def get_screening_set(self, reservation):
+        request = self.context.get("request")
+        screen = reservation.screening
+        movie = screen.movie
+        try:
+            img_url = request.build_absolute_uri(movie.main_img.url)
+            thumb_img_url = request.build_absolute_uri(movie.thumbnail_img.url)
+        except AttributeError:
+            img_url = ""
+            thumb_img_url = ""
+        title = movie.title
+        age = movie.age
+        theater = screen.theater.sub_location
+        time = datetime.strftime(screen.time, "%Y-%m-%d %H:%M")
+        return {
+            "img_url": img_url,
+            "thumb_img_url": thumb_img_url,
+            "title": title,
+            "age": age,
+            "theater": theater,
+            "time": time
+        }
+
+    def get_num(self, reservation):
+        return len(reservation.seats_reserved.all())
