@@ -105,6 +105,7 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
             show = {"show": False}
         return [data, {"time_set": serializer.data}, show]
 
+
 class TicketSeatSerializer(serializers.ModelSerializer):
     reservation_check = serializers.SerializerMethodField()
 

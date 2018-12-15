@@ -100,8 +100,6 @@ class TicketFilteringView(APIView):
         return Response(context, status=status.HTTP_200_OK)
 
 
-# 상영 영화 좌석 예매 리스트 API View
-# 상영 pk를 받는다.
 class TicketSeatListView(APIView):
     permission_classes = (
         permissions.IsAuthenticated,
