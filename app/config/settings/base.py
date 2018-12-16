@@ -59,9 +59,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_extensions',
     'nested_admin',
+    'imagekit',
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 8,
     'DEFAULT_RENDERER_CLASSES': (
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ),

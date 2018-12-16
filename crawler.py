@@ -5,6 +5,8 @@ import time
 import re
 import requests
 from datetime import datetime
+
+from config.settings.base import CHROME_DRIVER
 from mappings.models import Cast, Director, Directing, Casting
 from mappings.models import Movie, Stillcut
 from selenium.common.exceptions import NoSuchElementException
