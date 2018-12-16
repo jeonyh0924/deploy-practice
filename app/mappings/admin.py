@@ -1,4 +1,5 @@
 import datetime
+import string
 
 from django.contrib import admin
 import nested_admin
@@ -88,12 +89,21 @@ class SeatInline(nested_admin.nested.NestedTabularInline):
 
 # 상영관 Admin setting
 class AuditoriumAdmin(nested_admin.nested.NestedModelAdmin):
+    def default_seat_create(modeladmin, request, queryset):
+        alphabet = string.ascii_uppercase
+        for auditorium in queryset:
+            for row in range(1, 11):
+                for number in range(1, 11):
+                    auditorium.seats.create(row=row, number=number, seat_name=f'{alphabet[row-1]}' + f'{number}')
+
+    default_seat_create.short_description = "상영관 좌석 생성(10*10)"
     inlines = [ScreeningInline, SeatInline]
     list_display = ('name', 'theater', 'seats_no', 'get_movie')
     list_filter = (
         'theater__location',
         'theater__sub_location',
                    )
+    actions = [default_seat_create]
 
     def get_movie(self, obj):
         screening = obj.screenings.first()
@@ -141,14 +151,14 @@ class ReservationAdmin(admin.ModelAdmin):
         return obj.seats_reserved.all()
 
 
-class ScreeningAdmin(admin.ModelAdmin):
-    model = Screening
-    list_display = (
-        'movie',
-        'theater',
-        'auditorium',
-        'time'
-    )
+# class ScreeningAdmin(admin.ModelAdmin):
+#     model = Screening
+#     list_display = (
+#         'movie',
+#         'theater',
+#         'auditorium',
+#         'time'
+#     )
 
 
 
@@ -158,9 +168,9 @@ admin.site.register(Theater, TheaterAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Auditorium, AuditoriumAdmin)
 # admin.site.register(Seat)
-admin.site.register(Screening, ScreeningAdmin)
+# admin.site.register(Screening, ScreeningAdmin)
 admin.site.register(Cast)
-admin.site.register(Casting)
+# admin.site.register(Casting)
 admin.site.register(Director)
-admin.site.register(Directing)
+# admin.site.register(Directing)
 admin.site.register(ReservedSeat)
