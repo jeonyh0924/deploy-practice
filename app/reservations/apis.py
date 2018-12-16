@@ -2,18 +2,18 @@
 # from datetime import date
 import datetime
 import pytz
+from django.db import transaction, IntegrityError
 from django.db.models import Q
 from rest_framework import status, permissions
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
 # 예매 프로세스
 # 예매 필터링 API View
-from mappings.models import Screening, Movie, Theater
+from mappings.models import Screening, Movie, Theater, ReservedSeat, Seat, Reservation
 from reservations.serializers import TicketMovieSerializer, TicketScreeningDateTimeSerializer, \
-    TicketTheaterLocationSerializer, SeatSerializer
+    TicketTheaterLocationSerializer, TicketSeatSerializer, TicketReservationSerializer
 
 
 class TicketFilteringView(APIView):
@@ -101,12 +101,46 @@ class TicketFilteringView(APIView):
 
 
 class TicketSeatListView(APIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
     def get(self, request, pk):
-        screen = Screening.objects.get(pk=pk).auditorium
+        screen = Screening.objects.get(pk=pk)
         auditorium = screen.auditorium
         reserved_pk_list = [seat.pk for seat in screen.reserved_seats.all()]
-        serializer = SeatSerializer(auditorium.seats.all(), many=True, context={"reserved_seats": reserved_pk_list})
+        serializer = TicketSeatSerializer(auditorium.seats.all(), many=True, context={"reserved_seats": reserved_pk_list})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class TicketReservationView(APIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
 
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                screen = Screening.objects.get(pk=request.GET.get("screen"))
+                selected_seats_pk = request.GET.get("seats")
+                for pk in selected_seats_pk:
+                    if pk in [seat.pk for seat in screen.reserved_seats.all()]:
+                        return Response({"message": "이미 예약된 좌석입니다. 다른 좌석을 선택해 주세요."},
+                                        status=status.HTTP_400_BAD_REQUEST)
+
+                reservation = Reservation.objects.create(
+                    user=request.user,
+                    screening=screen,
+                )
+
+                for seat_pk in selected_seats_pk:
+                    ReservedSeat.objects.create(
+                        screening=screen,
+                        seat=Seat.objects.get(pk=seat_pk),
+                        reservation=reservation
+                    )
+
+                serializer = TicketReservationSerializer(reservation, context={"request": request})
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        except IntegrityError:
+            return Response({"message": "이미 예약된 좌석입니다. 다른 좌석을 선택해 주세요."}, status=status.HTTP_400_BAD_REQUEST)

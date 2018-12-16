@@ -1,16 +1,15 @@
-import string
+# import string
 
+# from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, generics
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mappings.models import Movie, Theater, Screening
+from mappings.models import Movie, Theater
 from mappings.serializers import MovieSerializer, MovieDetailSerializer, TheaterListSerializer, \
-    TheaterDetailSerializer,ReservedSeatsSerializer
-
-
-
+    TheaterDetailSerializer
 
 # Seat bulk create code
 # alphabet = string.ascii_uppercase
@@ -25,19 +24,42 @@ from mappings.serializers import MovieSerializer, MovieDetailSerializer, Theater
 
 
 # 영화 기본 정보 리스트 API View
-# request.GET으로
+# now_show를 받아야함
+# GET으로 page를 보내줘야함
+# class MovieListView(APIView):
+#     def get(self, request):
+#         if request.GET.get('now_show'):
+#             movie_list = Movie.objects.filter(now_show=True)
+#         else:
+#             movie_list = Movie.objects.all()
+#
+#         paginator = Paginator(movie_list, 8)
+#         page = request.GET.get('page')
+#         try:
+#             page_movie_list = paginator.page(page)
+#         except PageNotAnInteger:
+#             page_movie_list = paginator.page(1)
+#         except EmptyPage:
+#             page_movie_list = paginator.page(paginator.num_pages)
+#
+#         serializers = MovieSerializer(page_movie_list, many=True, context={"request": request})
+#         return Response(serializers.data, status=status.HTTP_200_OK)
 
-class MovieListView(APIView):
-    def get(self, request):
-        if request.GET.get('now_show'):
-            movie_list = Movie.objects.filter(now_show=True)
+
+class MovieListView(generics.ListAPIView):
+    queryset = Movie.objects.order_by('-reservation_score')
+    serializer_class = MovieSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        if self.request.GET.get('now_show'):
+            query_set = Movie.objects.filter(now_show=True)
         else:
-            movie_list = Movie.objects.all()
-        serializers = MovieSerializer(movie_list, many=True, context={"request": request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
+            query_set = super(MovieListView, self).get_queryset()
+        return query_set
 
 
-# now_show false 입력시 상영 예정작 리스트 력
+# now_show false 입력시 상영 예정작 리스트 출력
 class PreMovieView(APIView):
     def get(self, request):
         movie_list = Movie.objects.filter(now_show=False)
@@ -55,6 +77,8 @@ class MovieDetailView(APIView):
 
 
 # 극장 리스트 API View
+# 지역이 주어지면 해당 지역의 극장이 선택된다
+# 지역을 받지 못한 경우 모든 극장이 리턴
 class TheaterListView(APIView):
     def get(self, request):
         if request.GET.get('location'):
