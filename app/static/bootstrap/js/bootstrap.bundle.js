@@ -3680,7 +3680,7 @@
    * The `dataObject` is an object containing all the informations used by Popper.js
    * this object get passed to modifiers and to the `onCreate` and `onUpdate` callbacks.
    * @name dataObject
-   * @property {Object} data.instance The Popper.js instance
+   * @property {Object} data.movie_instance The Popper.js movie_instance
    * @property {String} data.placement Placement applied to popper
    * @property {String} data.originalPlacement Placement originally defined on init
    * @property {Boolean} data.flipped True if popper has been flipped by flip modifier
@@ -3740,7 +3740,7 @@
     /**
      * Callback called when the popper is created.<br />
      * By default, is set to no-op.<br />
-     * Access Popper.js instance with `data.instance`.
+     * Access Popper.js movie_instance with `data.movie_instance`.
      * @prop {onCreate}
      */
     onCreate: function onCreate() {},
@@ -3750,7 +3750,7 @@
      * on the initialization/creation of the popper, but only on subsequent
      * updates.<br />
      * By default, is set to no-op.<br />
-     * Access Popper.js instance with `data.instance`.
+     * Access Popper.js movie_instance with `data.movie_instance`.
      * @prop {onUpdate}
      */
     onUpdate: function onUpdate() {},
@@ -3777,12 +3777,12 @@
   // Methods
   var Popper = function () {
     /**
-     * Create a new Popper.js instance
+     * Create a new Popper.js movie_instance
      * @class Popper
      * @param {HTMLElement|referenceObject} reference - The reference element used to position the popper
      * @param {HTMLElement} popper - The HTML element used as popper.
      * @param {Object} options - Your custom options to override the ones defined in [Defaults](#defaults)
-     * @return {Object} instance - The generated Popper.js instance
+     * @return {Object} movie_instance - The generated Popper.js movie_instance
      */
     function Popper(reference, popper) {
       var _this = this;

@@ -8,6 +8,7 @@ from datetime import datetime
 from mappings.models import Cast, Director, Directing, Casting
 from mappings.models import Movie, Stillcut
 from selenium.common.exceptions import NoSuchElementException
+# from PIL import Image
 # from config.settings.base import CHROME_DRIVER
 
 
@@ -50,6 +51,9 @@ for url in detail_urls:
             img_data = img_response.content
             ext = imghdr.what('', h=img_data)
             main_image = SimpleUploadedFile(f'{title}.{ext}', img_data)
+            # thumbnail = Image.open(main_image)
+            # image_generator = Thumbnail(source=thumbnail)
+            # thumbnail_image = image_generator.generate()
 
             movie_instance = Movie.objects.create(
                 title=title,
@@ -60,6 +64,7 @@ for url in detail_urls:
                 opening_date=datetime.strptime(opening_date, '%Y.%m.%d').date(),
                 description=story,
                 main_img=main_image,
+                # thumbnail_img=thumbnail_image,
             )
             time.sleep(2)
 
