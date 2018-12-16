@@ -17,9 +17,9 @@ from reservations.serializers import TicketMovieSerializer, TicketScreeningDateT
 
 
 class TicketFilteringView(APIView):
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    # permission_classes = (
+    #     permissions.IsAuthenticated,
+    # )
     def movie_filter(self, request):
         if request.GET.get('movie') is not None:
             movie = request.GET.get('movie')
@@ -30,6 +30,11 @@ class TicketFilteringView(APIView):
     def location_filter(self, request):
         if request.GET.get('location') is not None:
             location = request.GET.get('location')
+            return Q(theater__location=location)
+        elif request.GET.get('sub_location') is not None:
+            sub_location = request.GET.get('sub_location')
+            theater = Theater.objects.get(sub_location=sub_location)
+            location = theater.location
             return Q(theater__location=location)
         else:
             return Q(theater__location__isnull=False)
