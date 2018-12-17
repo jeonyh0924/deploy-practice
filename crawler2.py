@@ -2,6 +2,7 @@ import imghdr
 
 # from PIL import Image
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import DataError
 from selenium import webdriver
 import time
 import re
@@ -57,92 +58,94 @@ for url in detail_urls:
             # thumbnail = Image.open(main_image)
             # image_generator = Thumbnail(source=thumbnail)
             # thumbnail_image = image_generator.generate()
-
-            movie_instance = Movie.objects.create(
-                title=title,
-                eng_title=eng_title,
-                genre=genre,
-                age=age,
-                duration_min=running_time,
-                opening_date=datetime.strptime(opening_date, '%Y.%m.%d').date(),
-                description=story,
-                main_img=main_image,
-                # thumbnail_img=thumbnail_image,
-            )
-
-            driver.find_elements_by_css_selector('ul.tab-menu li a')[2].click()
-            time.sleep(2)
-            stillcuts = driver.find_elements_by_css_selector('div#stillcut_list img')
-            stillcut_urls = [img.get_attribute("src") for img in stillcuts][:5]
-            index = 1
-            for stillcut_url in stillcut_urls:
-                stillcut_response = requests.get(stillcut_url)
-                stillcut_data = stillcut_response.content
-                ext = imghdr.what('', h=stillcut_data)
-                stillcut_image = SimpleUploadedFile(f'{title}_{index}.{ext}', stillcut_data)
-                Stillcut.objects.create(movie=movie_instance, image=stillcut_image)
-                index += 1
-            time.sleep(1)
-
-            driver.find_elements_by_css_selector('ul.tab-menu li a')[1].click()
-            # 감독 선택
-            director_namespace = driver.find_element_by_css_selector(
-                'div.sect-staff-director ul li.clear > div.box-contents dl dd a').text
-            director = re.split('\n', director_namespace)[0]
             try:
-                eng_director = re.split('\n', director_namespace)[1]
-            except IndexError:
-                eng_director = ""
-            d_image_url = driver.find_element_by_css_selector(
-                'div.sect-staff-director ul li.clear > div.box-image a span img').get_attribute("src")
-            d_img_response = requests.get(d_image_url)
-            d_img_data = d_img_response.content
-            ext = imghdr.what('', h=d_img_data)
-            director_image = SimpleUploadedFile(f'{title}.{ext}', d_img_data)
+                movie_instance = Movie.objects.create(
+                    title=title,
+                    eng_title=eng_title,
+                    genre=genre,
+                    age=age,
+                    duration_min=running_time,
+                    opening_date=datetime.strptime(opening_date, '%Y.%m.%d').date(),
+                    description=story,
+                    main_img=main_image,
+                    # thumbnail_img=thumbnail_image,
+                )
 
-            director_instance = Director.objects.create(
-                director=director,
-                eng_director=eng_director,
-                profile_img=director_image
-            )
+                driver.find_elements_by_css_selector('ul.tab-menu li a')[2].click()
+                time.sleep(2)
+                stillcuts = driver.find_elements_by_css_selector('div#stillcut_list img')
+                stillcut_urls = [img.get_attribute("src") for img in stillcuts][:5]
+                index = 1
+                for stillcut_url in stillcut_urls:
+                    stillcut_response = requests.get(stillcut_url)
+                    stillcut_data = stillcut_response.content
+                    ext = imghdr.what('', h=stillcut_data)
+                    stillcut_image = SimpleUploadedFile(f'{title}_{index}.{ext}', stillcut_data)
+                    Stillcut.objects.create(movie=movie_instance, image=stillcut_image)
+                    index += 1
+                time.sleep(1)
 
-            directing_instance = Directing.objects.create(
-                movie=movie_instance,
-                director=director_instance
-            )
-
-            # 배우 선택
-            cast_namespace_list = driver.find_elements_by_css_selector(
-                'div.sect-staff-actor ul li > div.box-contents dl dd a')
-            c_image_url_list = driver.find_elements_by_css_selector(
-                'div.sect-staff-actor ul li > div.box-image a span img')
-            cast_list = driver.find_elements_by_css_selector(
-                'div.sect-staff-actor ul li > div.box-contents dl dt')
-            cast_image_list = []
-            for c_image_url in c_image_url_list:
-                c_img_response = requests.get(c_image_url.get_attribute("src"))
-                c_img_data = c_img_response.content
-                ext = imghdr.what('', h=c_img_data)
-                cast_image = SimpleUploadedFile(f'{title}.{ext}', c_img_data)
-                cast_image_list.append(cast_image)
-            index = 0
-            for cast_namespace in cast_namespace_list:
-                actor = re.split('\n', cast_namespace.text)[0]
+                driver.find_elements_by_css_selector('ul.tab-menu li a')[1].click()
+                # 감독 선택
+                director_namespace = driver.find_element_by_css_selector(
+                    'div.sect-staff-director ul li.clear > div.box-contents dl dd a').text
+                director = re.split('\n', director_namespace)[0]
                 try:
-                    eng_actor = re.split('\n', cast_namespace.text)[1]
+                    eng_director = re.split('\n', director_namespace)[1]
                 except IndexError:
-                    eng_actor = ""
-                cast_instance = Cast.objects.create(
-                    actor=actor,
-                    eng_actor=eng_actor,
-                    profile_img=cast_image_list[index]
+                    eng_director = ""
+                d_image_url = driver.find_element_by_css_selector(
+                    'div.sect-staff-director ul li.clear > div.box-image a span img').get_attribute("src")
+                d_img_response = requests.get(d_image_url)
+                d_img_data = d_img_response.content
+                ext = imghdr.what('', h=d_img_data)
+                director_image = SimpleUploadedFile(f'{title}.{ext}', d_img_data)
+
+                director_instance = Director.objects.create(
+                    director=director,
+                    eng_director=eng_director,
+                    profile_img=director_image
                 )
-                casting_instance = Casting.objects.create(
+
+                directing_instance = Directing.objects.create(
                     movie=movie_instance,
-                    actor=cast_instance,
-                    cast=cast_list[index].text
+                    director=director_instance
                 )
-                index += 1
+
+                # 배우 선택
+                cast_namespace_list = driver.find_elements_by_css_selector(
+                    'div.sect-staff-actor ul li > div.box-contents dl dd a')
+                c_image_url_list = driver.find_elements_by_css_selector(
+                    'div.sect-staff-actor ul li > div.box-image a span img')
+                cast_list = driver.find_elements_by_css_selector(
+                    'div.sect-staff-actor ul li > div.box-contents dl dt')
+                cast_image_list = []
+                for c_image_url in c_image_url_list:
+                    c_img_response = requests.get(c_image_url.get_attribute("src"))
+                    c_img_data = c_img_response.content
+                    ext = imghdr.what('', h=c_img_data)
+                    cast_image = SimpleUploadedFile(f'{title}.{ext}', c_img_data)
+                    cast_image_list.append(cast_image)
+                index = 0
+                for cast_namespace in cast_namespace_list:
+                    actor = re.split('\n', cast_namespace.text)[0]
+                    try:
+                        eng_actor = re.split('\n', cast_namespace.text)[1]
+                    except IndexError:
+                        eng_actor = ""
+                    cast_instance = Cast.objects.create(
+                        actor=actor,
+                        eng_actor=eng_actor,
+                        profile_img=cast_image_list[index]
+                    )
+                    casting_instance = Casting.objects.create(
+                        movie=movie_instance,
+                        actor=cast_instance,
+                        cast=cast_list[index].text
+                    )
+                    index += 1
+            except DataError:
+                pass
 
         except NoSuchElementException:
             pass
