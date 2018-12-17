@@ -54,6 +54,7 @@ class WebTrailerSerializer(serializers.ModelSerializer):
 
 
 class AppTrailerSerializer(serializers.ModelSerializer):
+    movie_pk = serializers.SerializerMethodField()
     movie_title = serializers.SerializerMethodField()
     movie_trailer = serializers.SerializerMethodField()
     posting_img_url = serializers.SerializerMethodField()
@@ -61,11 +62,15 @@ class AppTrailerSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppTrailerContainer
         fields = (
+            'movie_pk',
             'movie_title',
             'movie_trailer',
             'comment',
             'posting_img_url'
         )
+
+    def get_movie_pk(self, container):
+        return container.movie.pk
 
     def get_movie_title(self, container):
         return container.movie.title

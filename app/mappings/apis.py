@@ -68,11 +68,10 @@ class PreMovieListView(generics.ListAPIView):
 
     def get_queryset(self):
         if self.request.GET.get('now_show'):
-            if self.request.GET.get('now_show'):
-                query_set = self.queryset.filter(now_show=True)
-            else:
-                query_set = self.queryset
-            return query_set
+            query_set = self.queryset.filter(now_show=True)
+        else:
+            query_set = self.queryset
+        return query_set
 
 
 # 영화 상세 정보 API View
@@ -115,5 +114,5 @@ class TheaterDetailView(APIView):
 class MovieOfficialListView(APIView):
     def get(self, request, pk):
         movie = get_object_or_404(Movie, pk=pk)
-        serializer = MovieOfficialListSerializer(movie, context={"request": request})
+        serializer = MovieOfficialListSerializer(movie, context={"request":request})
         return Response(serializer.data, status=status.HTTP_200_OK)

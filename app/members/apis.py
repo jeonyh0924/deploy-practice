@@ -88,7 +88,8 @@ class CheckPasswordView(APIView):
     )
 
     def post(self, request):
-        if request.user.check_password(request.POST["password"]):
+        check = request.user.check_password(request.POST.get("password"))
+        if check:
             return Response({'message': '인증에 성공했습니다.'}, status=status.HTTP_200_OK)
         else:
             return Response({'message': '인증에 실패했습니다.'}, status=status.HTTP_400_BAD_REQUEST)
