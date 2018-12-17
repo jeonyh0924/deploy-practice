@@ -28,6 +28,37 @@ class TicketMovieSerializer(serializers.ModelSerializer):
             return False
 
 
+class AppTicketMovieSerializer(serializers.ModelSerializer):
+    thumb_img_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Movie
+        fields = (
+            'pk',
+            'title',
+            'thumb_img_url'
+        )
+
+    def get_thumb_img_url(self, movie):
+        request = self.context.get('request')
+        try:
+            thumb_img_url = movie.thumbnail_img.url
+            return request.build_absolute_uri(thumb_img_url)
+        except AttributeError:
+            return ""
+
+
+class AppTicketMovieDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = (
+            'pk',
+            'title',
+            'age',
+            'duration_min'
+        )
+
+
 # Ticket Theater Serializer
 class TicketTheaterSubLocationSerializer(serializers.ModelSerializer):
     show = serializers.SerializerMethodField()
@@ -45,6 +76,28 @@ class TicketTheaterSubLocationSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+
+
+class AppTicketTheaterSubLocationSerializer(serializers.ModelSerializer):
+    screen_time = serializers.SerializerMethodField()
+    class Meta:
+        model = Theater
+        fields = (
+            'sub_location',
+            'screen_time'
+        )
+
+    def get_screen_time(self, theater):
+        sub_location = theater.sub_location
+        movie_pk = self.context.get("pk")
+        serializer = TicketScreeningTimeSerializer(
+            Screening.objects.filter(
+                movie=Movie.objects.get(pk=movie_pk),
+                theater__sub_location=sub_location
+            ),
+            many=True
+        )
+        return serializer.data
 
 
 class TicketTheaterLocationSerializer(serializers.ModelSerializer):
@@ -82,19 +135,24 @@ class TicketTheaterLocationSerializer(serializers.ModelSerializer):
         # return [data, num]
         # return [data, {"theater_set": serializer.data}, num]
 
+
 # Ticket Screening DateTime Serializer
 class TicketScreeningTimeSerializer(serializers.ModelSerializer):
     times = serializers.SerializerMethodField()
     current_seats_no = serializers.SerializerMethodField()
+    auditorium_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Screening
         fields = (
             'pk',
-            'auditorium',
+            'auditorium_name',
             'times',
             'current_seats_no'
         )
+
+    def get_auditorium_name(self, screening):
+        return screening.auditorium.name
 
     def get_times(self, screening):
         return screening.time.time()
@@ -104,8 +162,9 @@ class TicketScreeningTimeSerializer(serializers.ModelSerializer):
         return auditorium.seats_no - len(screening.reserved_seats.all())
 
 
-class TicketScreeningDateTimeSerializer(serializers.Serializer):
+class TicketScreeningDateSerializer(serializers.Serializer):
     date = serializers.CharField()
+    # weekday = serializers.CharField()
 
     # serializer.data 대신 validated_data를 쓴다면 to_internal_value로 데이터를 조작한다.
     # def to_internal_value(self, data):
@@ -117,9 +176,9 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
             show = {"show": True}
         else:
             show = {"show": False}
-        data = super(TicketScreeningDateTimeSerializer, self).to_representation(instance)
+        data = super(TicketScreeningDateSerializer, self).to_representation(instance)
 
-        # data = super(TicketScreeningDateTimeSerializer, self).to_representation(instance)
+        # data = super(TicketScreeningDateSerializer, self).to_representation(instance)
         # screening_by_filter = [screen for screen in Screening.objects.all()
         #                        if screen.time.date() == instance["date"] and screen.pk in self.context.get("show")]
         # serializer = TicketScreeningTimeSerializer(screening_by_filter, many=True)
@@ -128,6 +187,34 @@ class TicketScreeningDateTimeSerializer(serializers.Serializer):
         # else:
         #     show = {"show": False}
         return [data, show]
+
+
+class AppTicketScreeningDateSerializer(serializers.Serializer):
+    date = serializers.CharField()
+    weekday = serializers.CharField()
+
+    # serializer.data 대신 validated_data를 쓴다면 to_internal_value로 데이터를 조작한다.
+    # def to_internal_value(self, data):
+    #     return data
+
+    # serializer.data 를 쓸 때에만 to_representation을 거쳐간다.
+    def to_representation(self, instance):
+        if instance["date"] in self.context.get("filter_date_list"):
+            show = {"show": True}
+        else:
+            show = {"show": False}
+        data = super(AppTicketScreeningDateSerializer, self).to_representation(instance)
+
+        # data = super(TicketScreeningDateSerializer, self).to_representation(instance)
+        # screening_by_filter = [screen for screen in Screening.objects.all()
+        #                        if screen.time.date() == instance["date"] and screen.pk in self.context.get("show")]
+        # serializer = TicketScreeningTimeSerializer(screening_by_filter, many=True)
+        # if serializer.data:
+        #     show = {"show": True}
+        # else:
+        #     show = {"show": False}
+        return [data, show]
+
 
 class TicketSeatSerializer(serializers.ModelSerializer):
     reservation_check = serializers.SerializerMethodField()
