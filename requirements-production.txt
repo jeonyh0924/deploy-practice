@@ -5,8 +5,10 @@ djangorestframework<3.10
 django-storages<1.8
 django-extensions<2.14
 django-nested-admin<3.2.0
+pilkit<2.1
 psycopg2-binary<2.8
 Pillow<5.4
 pytz<2018.8
 sentry-sdk<0.6
 djangorestframework-camel-case<0.3.0
+django-imagekit<4.1.0

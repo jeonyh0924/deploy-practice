@@ -9,12 +9,13 @@ import re
 import requests
 from datetime import datetime
 # from config.settings.base import CHROME_DRIVER
+from config.settings.base import CHROME_DRIVER
 from mappings.models import Movie, Stillcut, Cast, Director, Directing, Casting
 from selenium.common.exceptions import NoSuchElementException
 
 
 driver = webdriver.Chrome(CHROME_DRIVER)
-driver = webdriver.Chrome('/home/hanoul/chromedriver')
+driver = webdriver.Chrome('//Users/mac/projects/deploy/ec2-deploy-practice/chromedriver')
 
 time.sleep(5)
 driver.get('https://www.cgv.co.kr/movies/')

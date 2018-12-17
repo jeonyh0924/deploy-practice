@@ -6,6 +6,8 @@ import time
 import re
 import requests
 from datetime import datetime
+
+from config.settings.base import CHROME_DRIVER
 from mappings.models import Cast, Director, Directing, Casting
 from mappings.models import Movie, Stillcut
 from selenium.common.exceptions import NoSuchElementException
@@ -14,7 +16,7 @@ from selenium.common.exceptions import NoSuchElementException
 
 
 driver = webdriver.Chrome(CHROME_DRIVER)
-driver = webdriver.Chrome('/home/hanoul/chromedriver')
+driver = webdriver.Chrome('//Users/mac/projects/deploy/ec2-deploy-practice/chromedriver')
 time.sleep(5)
 driver.get('https://www.cgv.co.kr/movies/')
 driver.find_element_by_css_selector('div.nowshow input').click()

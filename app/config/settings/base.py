@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # django-cors-header
     'corsheaders',
 
+    'containers',
     'mappings',
     'reservations',
     'members',
@@ -58,9 +59,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_extensions',
     'nested_admin',
+    'imagekit',
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 8,
     'DEFAULT_RENDERER_CLASSES': (
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ),
@@ -149,4 +153,4 @@ LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False

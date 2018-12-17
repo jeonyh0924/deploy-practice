@@ -9,7 +9,8 @@ from rest_framework.views import APIView
 
 from mappings.models import Movie, Theater
 from mappings.serializers import MovieSerializer, MovieDetailSerializer, TheaterListSerializer, \
-    TheaterDetailSerializer
+    TheaterDetailSerializer, MovieOfficialListSerializer
+
 
 # Seat bulk create code
 # alphabet = string.ascii_uppercase
@@ -107,4 +108,11 @@ class TheaterDetailView(APIView):
     def get(self, request, pk):
         theater = get_object_or_404(Theater, pk=pk)
         serializer = TheaterDetailSerializer(theater, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MovieOfficialListView(APIView):
+    def get(self, request, pk):
+        movie = get_object_or_404(Movie, pk=pk)
+        serializer = MovieOfficialListSerializer(movie, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)

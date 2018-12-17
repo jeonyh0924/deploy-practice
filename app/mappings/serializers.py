@@ -97,7 +97,8 @@ class CastSerializer(serializers.ModelSerializer):
         fields = (
             'actor',
             'eng_actor',
-            'profile_img'
+            # 'profile_img',
+            'profile_img_url'
         )
 
     def get_profile_img_url(self, cast):
@@ -110,23 +111,42 @@ class CastSerializer(serializers.ModelSerializer):
 
 
 class DirectorSerializer(serializers.ModelSerializer):
-    profile_img_url = serializers.SerializerMethodField()
+    # profile_img_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Director
         fields = (
             'director',
             'eng_director',
-            'profile_img'
+            'profile_img',
+            # 'profile_img_url'
         )
 
-    def get_profile_img_url(self, director):
-        request = self.context.get('request')
-        try:
-            director_img_url = director.profile_img.url
-            return request.build_absolute_uri(director_img_url)
-        except AttributeError:
-            return ""
+    # def get_profile_img_url(self, director):
+    #     request = self.context.get('request')
+    #     try:
+    #         director_img_url = director.profile_img.url
+    #         return request.build_absolute_uri(director_img_url)
+    #     except AttributeError:
+    #         return ""
+
+
+class MovieDetailCastSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cast
+        fields = (
+           'actor',
+       )
+
+
+class MovieDetailDirectorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Director
+        fields = (
+           'director',
+       )
 
 
 class MovieDetailSerializer(serializers.ModelSerializer):
@@ -135,7 +155,6 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     directors = MovieDetailDirectorSerializer(many=True)
     main_img_url = serializers.SerializerMethodField()
     thumb_img_url = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Movie
@@ -275,3 +294,16 @@ class ReservedSeatSerializer(serializers.ModelSerializer):
 
     def get_seat_name(self, seat):
         return seat.seat.seat_name
+
+
+class MovieOfficialListSerializer(serializers.ModelSerializer):
+    directors = DirectorSerializer(many=True)
+    casts = CastSerializer(many=True)
+
+    class Meta:
+        model = Movie
+        fields = (
+            'directors',
+            'casts',
+        )
+
