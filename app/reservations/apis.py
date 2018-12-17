@@ -20,9 +20,9 @@ from reservations.serializers import TicketMovieSerializer, TicketScreeningDateT
 
 
 class TicketFilteringView(APIView):
-    # permission_classes = (
-    #     permissions.IsAuthenticated,
-    # )
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
     def movie_filter(self, request):
         if request.GET.get('movie') is not None:
             movie = request.GET.get('movie')
