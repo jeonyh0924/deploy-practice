@@ -6,7 +6,7 @@ import operator
 import pytz
 from django.db import transaction, IntegrityError
 from django.db.models import Q
-from rest_framework import status, permissions
+from rest_framework import status, permissions, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,9 +14,10 @@ from rest_framework.views import APIView
 # 예매 프로세스
 # 예매 필터링 API View
 from mappings.models import Screening, Movie, Theater, ReservedSeat, Seat, Reservation
-from reservations.serializers import TicketMovieSerializer, TicketScreeningDateTimeSerializer, \
+from reservations.serializers import TicketMovieSerializer, TicketScreeningDateSerializer, \
     TicketTheaterLocationSerializer, TicketSeatSerializer, TicketReservationSerializer, \
-    TicketTheaterSubLocationSerializer, TicketScreeningTimeSerializer
+    TicketTheaterSubLocationSerializer, TicketScreeningTimeSerializer, AppTicketMovieSerializer, \
+    AppTicketScreeningDateSerializer, AppTicketMovieDetailSerializer, AppTicketTheaterSubLocationSerializer
 
 
 class TicketFilteringView(APIView):
@@ -119,7 +120,7 @@ class TicketFilteringView(APIView):
         #     date_dict = {"date": date}
         #     filter_date_list.append(date_dict)
 
-        date_serializer = TicketScreeningDateTimeSerializer(
+        date_serializer = TicketScreeningDateSerializer(
             data=date_list,
             many=True,
             context={"filter_date_list": filter_date_list}
@@ -137,6 +138,143 @@ class TicketFilteringView(APIView):
         return Response(context, status=status.HTTP_200_OK)
 
 
+# App Reservationm API Views
+class AppTicketMovieListView(generics.ListAPIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+    queryset = Movie.objects.order_by('-reservation_score').filter(now_show=True)
+    serializer_class = AppTicketMovieSerializer
+
+    # 여기서 고른 영화 pk를 다음 으로 전달
+    #  고른 영화에 해당하는 Screening들 전부
+    # 지역 선택 필터 추가
+
+class AppTicketFilteringView(APIView):
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    # 고른 영화의  pk 를 url로 전달받는다.
+    def movie_filter(self, request, pk=None):
+        if pk is not None:
+        # if request.GET.get('movie') is not None:
+            # movie = request.GET.get('movie')
+            return Q(movie__pk=pk)
+        else:
+            return Q(movie__isnull=False)
+
+    def location_filter(self, request):
+        if request.GET.get('location') is not None:
+            location = request.GET.get('location')
+            return Q(theater__location=location)
+        elif request.GET.get('sub_location') is not None:
+            sub_location = request.GET.get('sub_location')
+            theater = Theater.objects.get(sub_location=sub_location)
+            location = theater.location
+            return Q(theater__location=location)
+        else:
+            return Q(theater__location__isnull=False)
+
+    def sub_location_filter(self, request):
+        if request.GET.get('sub_location') is not None:
+            sub_location = request.GET.get('sub_location')
+            return Q(theater__sub_location=sub_location)
+        else:
+            return Q(theater__sub_location__isnull=False)
+
+    def time_filter(self, request):
+        if request.GET.get('time') is not None:
+            raw_time = request.GET.get('time') + ' 00:00:00'
+            base_time = datetime.datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S')
+            max_time = base_time + datetime.timedelta(hours=23, minutes=59, seconds=59)
+
+            return Q(time__gt=base_time) & Q(time__lt=max_time)
+        else:
+            return Q(time__isnull=False)
+
+    def get(self, request, pk=None):
+        context = {}
+        screens = Screening.objects.filter(
+            self.movie_filter(request, pk) & self.location_filter(request) & self.sub_location_filter(
+                request) & self.time_filter(request))
+
+        detail_serializer = AppTicketMovieDetailSerializer(
+            Movie.objects.get(pk=pk)
+        )
+        context["detail"] = detail_serializer.data
+
+        # Movie serializer
+        filter_movie_pk_list = [screen.movie.pk for screen in screens]
+
+        movie_serializer = AppTicketMovieSerializer(
+            Movie.objects.order_by('-reservation_score').filter(now_show=True),
+            context={"show": filter_movie_pk_list, "request": request},
+            many=True
+        )
+        context["movie"] = movie_serializer.data
+
+        filter_theater_pk_list = list(set([screen.theater.pk for screen in screens]))
+
+        location_serializer = TicketTheaterLocationSerializer(
+            sorted(Theater.objects.order_by('location').distinct('location'), key=operator.attrgetter('pk')),
+            context={"pk_list": filter_theater_pk_list},
+            many=True
+        )
+
+        context["location"] = location_serializer.data
+
+        if request.GET.get('location') is not None:
+            location = request.GET.get('location')
+            sub_location_serializer = AppTicketTheaterSubLocationSerializer(
+                Theater.objects.order_by('sub_location').distinct('sub_location').filter(Q(location=location) & Q(screenings__movie__pk=pk)),
+                context={"pk": pk},
+                many=True
+            )
+            context["sub_location"] = sub_location_serializer.data
+        else:
+            sub_location_serializer = AppTicketTheaterSubLocationSerializer(
+                Theater.objects.order_by('sub_location').distinct('sub_location').filter(screenings__movie__pk=pk),
+                context={"pk": pk},
+                many=True
+            )
+            context["sub_location"] = sub_location_serializer.data
+
+        # DateTime serializer
+        start = datetime.datetime.today()
+        end = start + datetime.timedelta(days=7)
+        date_set = [datetime.datetime.strftime((start + datetime.timedelta(days=x)), "%Y-%m-%d") for x in
+                    range(0, (end - start).days)]
+        weekday_set = [['월', '화', '수', '목', '금', '토', '일'][(start + datetime.timedelta(days=x)).weekday()] for x in
+                    range(0, (end - start).days)]
+        date_week_set = list(zip(date_set, weekday_set))
+        date_list = []
+        for date, weekday in date_week_set:
+            date_dict = {"date": date, "weekday": weekday}
+            date_list.append(date_dict)
+
+        filter_date_list = list(set([datetime.datetime.strftime(screen.time, "%Y-%m-%d") for screen in screens]))
+
+        date_serializer = AppTicketScreeningDateSerializer(
+            data=date_list,
+            many=True,
+            context={"filter_date_list": filter_date_list}
+        )
+        if date_serializer.is_valid():
+            context["date"] = date_serializer.data
+        ##########################################
+        # serializer = TicketScreeningTimeSerializer(
+        #     screens, many=True
+        # )
+        # context["time"] = serializer.data
+
+        return Response(context, status=status.HTTP_200_OK)
+
+
+# screeening pk 고르면 좌석 선택으로 넘어감
+# 기존 api 사용
+# 좌석 선택 및 screening pk 로 예매 생성
+# 기존 api 사용
 class TicketSeatListView(APIView):
     permission_classes = (
         permissions.IsAuthenticated,
