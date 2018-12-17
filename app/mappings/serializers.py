@@ -37,10 +37,10 @@ class TheaterMovieSerializer(serializers.ModelSerializer):
             'pk',
             'title',
             'age',
-            'now_open',
             'genre',
             'duration_min',
             'opening_date',
+            'now_open',
             'now_show',
             'thumb_img_url'
         )
@@ -71,6 +71,22 @@ class StillcutSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(image_url)
         except AttributeError:
             return ""
+
+
+class MovieDetailCastSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cast
+        fields = (
+            'actor',
+        )
+
+
+class MovieDetailDirectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Director
+        fields = (
+            'director',
+        )
 
 
 class CastSerializer(serializers.ModelSerializer):
@@ -115,8 +131,8 @@ class DirectorSerializer(serializers.ModelSerializer):
 
 class MovieDetailSerializer(serializers.ModelSerializer):
     stillcuts = StillcutSerializer(many=True)
-    casts = CastSerializer(many=True)
-    directors = DirectorSerializer()
+    casts = MovieDetailCastSerializer(many=True)
+    directors = MovieDetailDirectorSerializer(many=True)
     main_img_url = serializers.SerializerMethodField()
     thumb_img_url = serializers.SerializerMethodField()
 

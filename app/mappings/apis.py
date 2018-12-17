@@ -47,33 +47,45 @@ from mappings.serializers import MovieSerializer, MovieDetailSerializer, Theater
 
 
 class MovieListView(generics.ListAPIView):
-    queryset = Movie.objects.order_by('-reservation_score')
+    queryset = Movie.objects.order_by('-reservation_score').filter(now_open=True)
     serializer_class = MovieSerializer
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.GET.get('now_show'):
-            query_set = Movie.objects.filter(now_show=True)
+            query_set = self.queryset.filter(now_show=True)
         else:
-            query_set = super(MovieListView, self).get_queryset()
+            query_set = self.queryset
         return query_set
 
 
 # now_show false 입력시 상영 예정작 리스트 출력
-class PreMovieView(APIView):
-    def get(self, request):
-        movie_list = Movie.objects.filter(now_show=False)
-        serializers = MovieSerializer(movie_list, many=True, context={"request": request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
+class PreMovieListView(generics.ListAPIView):
+    queryset = Movie.objects.order_by('opening_date').filter(now_open=False)
+    serializer_class = MovieSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        if self.request.GET.get('now_show'):
+            if self.request.GET.get('now_show'):
+                query_set = self.queryset.filter(now_show=True)
+            else:
+                query_set = self.queryset
+            return query_set
 
 
 # 영화 상세 정보 API View
 # 영화 pk를 받는다.
-class MovieDetailView(APIView):
-    def get(self, request, pk):
-        movie = get_object_or_404(Movie, pk=pk)
-        serializer = MovieDetailSerializer(movie, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class MovieDetailView(generics.RetrieveAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieDetailSerializer
+
+    def get_object(self):
+        return get_object_or_404(Movie, pk=self.kwargs.get("pk"))
+    # def get(self, request, pk):
+    #     movie = get_object_or_404(Movie, pk=pk)
+    #     serializer = MovieDetailSerializer(movie, context={"request": request})
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # 극장 리스트 API View
