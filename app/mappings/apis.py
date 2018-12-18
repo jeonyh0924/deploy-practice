@@ -114,5 +114,5 @@ class TheaterDetailView(APIView):
 class MovieOfficialListView(APIView):
     def get(self, request, pk):
         movie = get_object_or_404(Movie, pk=pk)
-        serializer = MovieOfficialListSerializer(movie, context={"request": request})
+        serializer = MovieOfficialListSerializer(movie, context={"request":request})
         return Response(serializer.data, status=status.HTTP_200_OK)
