@@ -10,6 +10,7 @@ from .serializers import UserSerializer, SocialAccountSerializer, CheckUniqueIDS
 # from rest_framework.authtoken.serializers import AuthCustomTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from config.tasks import makereservation
 User = get_user_model()
 
 
@@ -179,6 +180,8 @@ class UserReservationView(APIView):
         reservation.save()
         for seat in reservation.seats_reserved.all():
             seat.delete()
+        # celery 예매율 계산
+        makereservation.delay(reservation.screening.pk)
         serializers = ReservationSerializer(reservation, context={"request": request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 

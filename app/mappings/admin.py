@@ -48,8 +48,13 @@ class MovieAdmin(nested_admin.nested.NestedModelAdmin):
                 movie.now_show = False
                 movie.save()
 
+    def distinct_update(modeladmin, request, queryset):
+        distinct_movies = Movie.objects.order_by('title').distinct('title')
+        Movie.objects.exclude(pk__in=distinct_movies.values_list('pk', flat=True)).delete()
+
     now_open_update.short_description = "현재 개봉작 업데이트"
     now_show_update.short_description = "현재 상영작 업데이트"
+    distinct_update.short_description = "중복 영화 제거"
 
     list_display = ['title']
     list_filter = (
@@ -58,7 +63,7 @@ class MovieAdmin(nested_admin.nested.NestedModelAdmin):
         'now_show',
     )
     inlines = [DirectingInline, CastingInline, StillcutInline]
-    actions = [now_show_update, now_open_update]
+    actions = [now_show_update, now_open_update, distinct_update]
 
     def save_model(self, request, obj, form, change):
         super(MovieAdmin, self).save_model(request, obj, form, change)
@@ -151,10 +156,24 @@ class ReservationAdmin(admin.ModelAdmin):
         return obj.seats_reserved.all()
 
 
+class SeatAdmin(admin.ModelAdmin):
+    model = Seat
+    list_display = (
+        'pk',
+        'auditorium_name',
+        'seat_name',
+        'row',
+        'number'
+    )
+
+    def auditorium_name(self, obj):
+        return obj.auditorium.name
+
 class ScreeningAdmin(admin.ModelAdmin):
     model = Screening
     list_display = (
         'movie',
+        'pk',
         'theater',
         'auditorium',
         'time'
@@ -167,7 +186,7 @@ admin.site.register(Theater, TheaterAdmin)
 # admin.site.register(Stillcut)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Auditorium, AuditoriumAdmin)
-# admin.site.register(Seat)
+admin.site.register(Seat, SeatAdmin)
 admin.site.register(Screening, ScreeningAdmin)
 admin.site.register(Cast)
 # admin.site.register(Casting)
