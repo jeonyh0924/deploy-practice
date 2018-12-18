@@ -4,6 +4,7 @@ from . import apis
 urlpatterns_api_movies = ([
   path('', apis.MovieListView.as_view()),
   path('detail/<int:pk>/', apis.MovieDetailView.as_view()),
+  path('official/<int:pk>/', apis.MovieOfficialListView.as_view()),
   path('pre/', apis.PreMovieListView.as_view()),
 ], 'movies')
 
