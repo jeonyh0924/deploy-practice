@@ -52,7 +52,7 @@ class MovieListView(generics.ListAPIView):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        if self.request.GET.get('now_show'):
+        if self.request.data.get('now_show'):
             query_set = self.queryset.filter(now_show=True)
         else:
             query_set = self.queryset
@@ -66,7 +66,7 @@ class PreMovieListView(generics.ListAPIView):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        if self.request.GET.get('now_show'):
+        if self.request.data.get('now_show'):
             query_set = self.queryset.filter(now_show=True)
         else:
             query_set = self.queryset
@@ -92,8 +92,8 @@ class MovieDetailView(generics.RetrieveAPIView):
 # 지역을 받지 못한 경우 모든 극장이 리턴
 class TheaterListView(APIView):
     def get(self, request):
-        if request.GET.get('location'):
-            location = request.GET.get('location')
+        if request.data.get('location'):
+            location = request.data.get('location')
             theater_list = Theater.objects.filter(location=location)
         else:
             theater_list = Theater.objects.all()

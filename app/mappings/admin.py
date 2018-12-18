@@ -151,14 +151,14 @@ class ReservationAdmin(admin.ModelAdmin):
         return obj.seats_reserved.all()
 
 
-# class ScreeningAdmin(admin.ModelAdmin):
-#     model = Screening
-#     list_display = (
-#         'movie',
-#         'theater',
-#         'auditorium',
-#         'time'
-#     )
+class ScreeningAdmin(admin.ModelAdmin):
+    model = Screening
+    list_display = (
+        'movie',
+        'theater',
+        'auditorium',
+        'time'
+    )
 
 
 
@@ -168,7 +168,7 @@ admin.site.register(Theater, TheaterAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Auditorium, AuditoriumAdmin)
 # admin.site.register(Seat)
-# admin.site.register(Screening, ScreeningAdmin)
+admin.site.register(Screening, ScreeningAdmin)
 admin.site.register(Cast)
 # admin.site.register(Casting)
 admin.site.register(Director)

@@ -2,8 +2,10 @@
 # from datetime import date
 import datetime
 import operator
+import random
 
 import pytz
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction, IntegrityError
 from django.db.models import Q
 from rest_framework import status, permissions, generics
@@ -25,18 +27,18 @@ class TicketFilteringView(APIView):
         permissions.IsAuthenticated,
     )
     def movie_filter(self, request):
-        if request.GET.get('movie') is not None:
-            movie = request.GET.get('movie')
+        if request.data.get('movie') is not None:
+            movie = request.data.get('movie')
             return Q(movie__title=movie)
         else:
             return Q(movie__isnull=False)
 
     def location_filter(self, request):
-        if request.GET.get('location') is not None:
-            location = request.GET.get('location')
+        if request.data.get('location') is not None:
+            location = request.data.get('location')
             return Q(theater__location=location)
-        elif request.GET.get('sub_location') is not None:
-            sub_location = request.GET.get('sub_location')
+        elif request.data.get('sub_location') is not None:
+            sub_location = request.data.get('sub_location')
             theater = Theater.objects.get(sub_location=sub_location)
             location = theater.location
             return Q(theater__location=location)
@@ -44,15 +46,15 @@ class TicketFilteringView(APIView):
             return Q(theater__location__isnull=False)
 
     def sub_location_filter(self, request):
-        if request.GET.get('sub_location') is not None:
-            sub_location = request.GET.get('sub_location')
+        if request.data.get('sub_location') is not None:
+            sub_location = request.data.get('sub_location')
             return Q(theater__sub_location=sub_location)
         else:
             return Q(theater__sub_location__isnull=False)
 
     def time_filter(self, request):
-        if request.GET.get('time') is not None:
-            raw_time = request.GET.get('time') + ' 00:00:00'
+        if request.data.get('time') is not None:
+            raw_time = request.data.get('time') + ' 00:00:00'
             base_time = datetime.datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S')
             # .replace(tzinfo=pytz.UTC)
             max_time = base_time + datetime.timedelta(hours=23, minutes=59, seconds=59)
@@ -93,8 +95,8 @@ class TicketFilteringView(APIView):
         # if location_serializer.is_valid():
         context["location"] = location_serializer.data
 
-        if request.GET.get('location') is not None:
-            location = request.GET.get('location')
+        if request.data.get('location') is not None:
+            location = request.data.get('location')
             # filter_theater_pk_list = list(
             #     set([screen.theater.pk for screen in screens.filter(theater__location=location)]))
             sub_location_serializer = TicketTheaterSubLocationSerializer(
@@ -129,7 +131,7 @@ class TicketFilteringView(APIView):
             context["date"] = date_serializer.data
 
 
-        if request.GET.get('location') is not None and request.GET.get('sub_location') is not None and request.GET.get('time') is not None and request.GET.get('movie') is not None:
+        if request.data.get('location') is not None and request.GET.get('sub_location') is not None and request.GET.get('time') is not None and request.GET.get('movie') is not None:
             serializer = TicketScreeningTimeSerializer(
                 screens, many=True
             )
@@ -158,34 +160,20 @@ class AppTicketFilteringView(APIView):
     # 고른 영화의  pk 를 url로 전달받는다.
     def movie_filter(self, request, pk=None):
         if pk is not None:
-        # if request.GET.get('movie') is not None:
-            # movie = request.GET.get('movie')
             return Q(movie__pk=pk)
         else:
             return Q(movie__isnull=False)
 
     def location_filter(self, request):
-        if request.GET.get('location') is not None:
-            location = request.GET.get('location')
-            return Q(theater__location=location)
-        elif request.GET.get('sub_location') is not None:
-            sub_location = request.GET.get('sub_location')
-            theater = Theater.objects.get(sub_location=sub_location)
-            location = theater.location
+        if request.data.get('location') is not None:
+            location = request.data.get('location')
             return Q(theater__location=location)
         else:
             return Q(theater__location__isnull=False)
 
-    def sub_location_filter(self, request):
-        if request.GET.get('sub_location') is not None:
-            sub_location = request.GET.get('sub_location')
-            return Q(theater__sub_location=sub_location)
-        else:
-            return Q(theater__sub_location__isnull=False)
-
     def time_filter(self, request):
-        if request.GET.get('time') is not None:
-            raw_time = request.GET.get('time') + ' 00:00:00'
+        if request.data.get('time') is not None:
+            raw_time = request.data.get('time') + ' 00:00:00'
             base_time = datetime.datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S')
             max_time = base_time + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
@@ -196,8 +184,7 @@ class AppTicketFilteringView(APIView):
     def get(self, request, pk=None):
         context = {}
         screens = Screening.objects.filter(
-            self.movie_filter(request, pk) & self.location_filter(request) & self.sub_location_filter(
-                request) & self.time_filter(request))
+            self.movie_filter(request, pk) & self.location_filter(request) & self.time_filter(request))
 
         detail_serializer = AppTicketMovieDetailSerializer(
             Movie.objects.get(pk=pk)
@@ -224,8 +211,8 @@ class AppTicketFilteringView(APIView):
 
         context["location"] = location_serializer.data
 
-        if request.GET.get('location') is not None:
-            location = request.GET.get('location')
+        if request.data.get('location') is not None:
+            location = request.data.get('location')
             sub_location_serializer = AppTicketTheaterSubLocationSerializer(
                 Theater.objects.order_by('sub_location').distinct('sub_location').filter(Q(location=location) & Q(screenings__movie__pk=pk)),
                 context={"pk": pk},
@@ -262,11 +249,6 @@ class AppTicketFilteringView(APIView):
         )
         if date_serializer.is_valid():
             context["date"] = date_serializer.data
-        ##########################################
-        # serializer = TicketScreeningTimeSerializer(
-        #     screens, many=True
-        # )
-        # context["time"] = serializer.data
 
         return Response(context, status=status.HTTP_200_OK)
 
@@ -296,8 +278,8 @@ class TicketReservationView(APIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                screen = Screening.objects.get(pk=request.GET.get("screen"))
-                selected_seats_pk = request.GET.get("seats")
+                screen = Screening.objects.get(pk=request.data.get("screen"))
+                selected_seats_pk = request.data.get("seats")
                 for pk in selected_seats_pk:
                     if pk in [seat.pk for seat in screen.reserved_seats.all()]:
                         return Response({"message": "이미 예약된 좌석입니다. 다른 좌석을 선택해 주세요."},
@@ -319,3 +301,19 @@ class TicketReservationView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except IntegrityError:
             return Response({"message": "이미 예약된 좌석입니다. 다른 좌석을 선택해 주세요."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# start_pk = Theater.objects.first().pk
+# last_pk = Theater.objects.last().pk
+# for movie in Movie.objects.filter(now_show=False):
+#     pk = random.randrange(start_pk, last_pk+1)
+#     try:
+#         theater = Theater.objects.get(pk=pk)
+#         auditorium = random.choice(theater.auditoriums.all())
+#         Screening.objects.create(
+#             movie=movie,
+#             theater=theater,
+#             time=datetime.datetime.now(),
+#             auditorium=auditorium)
+#     except ObjectDoesNotExist:
+#         pass

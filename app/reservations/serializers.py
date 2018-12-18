@@ -200,10 +200,11 @@ class AppTicketScreeningDateSerializer(serializers.Serializer):
     # serializer.data 를 쓸 때에만 to_representation을 거쳐간다.
     def to_representation(self, instance):
         if instance["date"] in self.context.get("filter_date_list"):
-            show = {"show": True}
+            show = True
         else:
-            show = {"show": False}
+            show = False
         data = super(AppTicketScreeningDateSerializer, self).to_representation(instance)
+        data["show"] = show
 
         # data = super(TicketScreeningDateSerializer, self).to_representation(instance)
         # screening_by_filter = [screen for screen in Screening.objects.all()
@@ -213,7 +214,7 @@ class AppTicketScreeningDateSerializer(serializers.Serializer):
         #     show = {"show": True}
         # else:
         #     show = {"show": False}
-        return [data, show]
+        return data
 
 
 class TicketSeatSerializer(serializers.ModelSerializer):
