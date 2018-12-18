@@ -73,7 +73,7 @@ class AppHomeView(APIView):
         except IndexError:
             app_data = ""
 
-        if request.GET.get("now_open"):
+        if request.data.get("now_open"):
             chart_list = Movie.objects.order_by('-reservation_score').filter(now_open=True)
         else:
             chart_list = Movie.objects.order_by('opening_date').filter(now_open=False)
