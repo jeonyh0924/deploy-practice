@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 # 예매 프로세스
 # 예매 필터링 API View
+from config.tasks import makereservation
 from mappings.models import Screening, Movie, Theater, ReservedSeat, Seat, Reservation
 from reservations.serializers import TicketMovieSerializer, TicketScreeningDateSerializer, \
     TicketTheaterLocationSerializer, TicketSeatSerializer, TicketReservationSerializer, \
@@ -131,7 +132,7 @@ class TicketFilteringView(APIView):
             context["date"] = date_serializer.data
 
 
-        if request.data.get('location') is not None and request.GET.get('sub_location') is not None and request.GET.get('time') is not None and request.GET.get('movie') is not None:
+        if request.data.get('location') is not None and request.data.get('sub_location') is not None and request.data.get('time') is not None and request.data.get('movie') is not None:
             serializer = TicketScreeningTimeSerializer(
                 screens, many=True
             )
@@ -296,24 +297,9 @@ class TicketReservationView(APIView):
                         seat=Seat.objects.get(pk=seat_pk),
                         reservation=reservation
                     )
-
+                # celery 예매율 계산
+                makereservation.delay(screen.pk)
                 serializer = TicketReservationSerializer(reservation, context={"request": request})
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except IntegrityError:
             return Response({"message": "이미 예약된 좌석입니다. 다른 좌석을 선택해 주세요."}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# start_pk = Theater.objects.first().pk
-# last_pk = Theater.objects.last().pk
-# for movie in Movie.objects.filter(now_show=False):
-#     pk = random.randrange(start_pk, last_pk+1)
-#     try:
-#         theater = Theater.objects.get(pk=pk)
-#         auditorium = random.choice(theater.auditoriums.all())
-#         Screening.objects.create(
-#             movie=movie,
-#             theater=theater,
-#             time=datetime.datetime.now(),
-#             auditorium=auditorium)
-#     except ObjectDoesNotExist:
-#         pass

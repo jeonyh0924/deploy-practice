@@ -5,6 +5,7 @@ from imagekit import ImageSpec
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
+
 User = get_user_model()
 
 
