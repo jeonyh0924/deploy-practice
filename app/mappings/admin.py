@@ -1,4 +1,5 @@
 import datetime
+import random
 import string
 
 from django.contrib import admin
@@ -52,18 +53,25 @@ class MovieAdmin(nested_admin.nested.NestedModelAdmin):
         distinct_movies = Movie.objects.order_by('title').distinct('title')
         Movie.objects.exclude(pk__in=distinct_movies.values_list('pk', flat=True)).delete()
 
+    def reservation_score_update(modeladmin, request, queryset):
+        for movie in queryset:
+            movie.reservation_score = len(ReservedSeat.objects.filter(screening__movie=movie)) / len(
+                    ReservedSeat.objects.all())
+            movie.save()
+
     now_open_update.short_description = "현재 개봉작 업데이트"
     now_show_update.short_description = "현재 상영작 업데이트"
     distinct_update.short_description = "중복 영화 제거"
+    reservation_score_update.short_description = "예매율 업데이트"
 
-    list_display = ['title']
+    list_display = ['title', 'pk', 'reservation_score']
     list_filter = (
         'genre',
         'now_open',
         'now_show',
     )
     inlines = [DirectingInline, CastingInline, StillcutInline]
-    actions = [now_show_update, now_open_update, distinct_update]
+    actions = [now_show_update, now_open_update, distinct_update, reservation_score_update]
 
     def save_model(self, request, obj, form, change):
         super(MovieAdmin, self).save_model(request, obj, form, change)
@@ -140,8 +148,22 @@ class TheaterAdmin(nested_admin.nested.NestedModelAdmin):
 
 
 class ReservationAdmin(admin.ModelAdmin):
+    def make_random_reservations(modeladmin, request, queryset):
+        for i in range(1, 31):
+            screen = random.choice(Screening.objects.all())
+            reservation = Reservation.objects.create(
+                user=random.choice(User.objects.all()),
+                screening=screen
+            )
+            ReservedSeat.objects.create(
+                screening=screen,
+                seat=random.choice(Seat.objects.filter(auditorium=screen.auditorium)),
+                reservation=reservation
+            )
+    make_random_reservations.short_description = "무작위 예매 생성"
     model = Reservation
     list_display = ('user', 'pk', 'get_movie', 'get_theater', 'get_seat', 'is_active')
+    actions = [make_random_reservations]
 
     def get_movie(self, obj):
         return obj.screening.movie
@@ -170,6 +192,23 @@ class SeatAdmin(admin.ModelAdmin):
         return obj.auditorium.name
 
 class ScreeningAdmin(admin.ModelAdmin):
+    def make_random_screenings(modeladmin, request, queryset):
+        start_pk = Theater.objects.first().pk
+        last_pk = Theater.objects.last().pk
+        for movie in Movie.objects.filter(now_show=False):
+            pk = random.randrange(start_pk, last_pk + 1)
+            try:
+                theater = Theater.objects.get(pk=pk)
+                auditorium = random.choice(theater.auditoriums.all())
+                Screening.objects.create(
+                    movie=movie,
+                    theater=theater,
+                    time=datetime.datetime.now(),
+                    auditorium=auditorium)
+            except ObjectDoesNotExist:
+                pass
+
+    make_random_screenings.short_description = "무작위 상영 인스턴스 생성"
     model = Screening
     list_display = (
         'movie',
@@ -178,6 +217,8 @@ class ScreeningAdmin(admin.ModelAdmin):
         'auditorium',
         'time'
     )
+    actions = [make_random_screenings]
+
 
 
 

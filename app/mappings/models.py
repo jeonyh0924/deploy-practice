@@ -314,3 +314,20 @@ class ReservedSeat(models.Model):
     screening = models.ForeignKey(Screening, on_delete=models.CASCADE, verbose_name='상영시간')
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE, verbose_name='좌석')
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='seats_reserved', verbose_name='예매')
+
+    # def save(self, force_insert=False, force_update=False, using=None,
+    #          update_fields=None):
+    #     super(ReservedSeat, self).save()
+    #     screen = self.screening
+    #     movie = screen.movie
+    #     screen.movie.reservation_score = len(ReservedSeat.objects.filter(screening__movie=movie)) / len(
+    #         ReservedSeat.objects.all())
+    #     screen.movie.save()
+    #
+    # def delete(self, using=None, keep_parents=False):
+    #     screen = self.screening
+    #     super(ReservedSeat, self).delete()
+    #     movie = screen.movie
+    #     screen.movie.reservation_score = len(ReservedSeat.objects.filter(screening__movie=movie)) / len(
+    #         ReservedSeat.objects.all())
+    #     screen.movie.save()
