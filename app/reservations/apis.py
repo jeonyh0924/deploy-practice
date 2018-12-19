@@ -28,18 +28,18 @@ class TicketFilteringView(APIView):
         permissions.IsAuthenticated,
     )
     def movie_filter(self, request):
-        if request.data.get('movie') is not None:
-            movie = request.data.get('movie')
+        if request.GET.get('movie') is not None:
+            movie = request.GET.get('movie')
             return Q(movie__title=movie)
         else:
             return Q(movie__isnull=False)
 
     def location_filter(self, request):
-        if request.data.get('location') is not None:
-            location = request.data.get('location')
+        if request.GET.get('location') is not None:
+            location = request.GET.get('location')
             return Q(theater__location=location)
-        elif request.data.get('sub_location') is not None:
-            sub_location = request.data.get('sub_location')
+        elif request.GET.get('sub_location') is not None:
+            sub_location = request.GET.get('sub_location')
             theater = Theater.objects.get(sub_location=sub_location)
             location = theater.location
             return Q(theater__location=location)
@@ -47,15 +47,15 @@ class TicketFilteringView(APIView):
             return Q(theater__location__isnull=False)
 
     def sub_location_filter(self, request):
-        if request.data.get('sub_location') is not None:
-            sub_location = request.data.get('sub_location')
+        if request.GET.get('sub_location') is not None:
+            sub_location = request.GET.get('sub_location')
             return Q(theater__sub_location=sub_location)
         else:
             return Q(theater__sub_location__isnull=False)
 
     def time_filter(self, request):
-        if request.data.get('time') is not None:
-            raw_time = request.data.get('time') + ' 00:00:00'
+        if request.GET.get('time') is not None:
+            raw_time = request.GET.get('time') + ' 00:00:00'
             base_time = datetime.datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S')
             # .replace(tzinfo=pytz.UTC)
             max_time = base_time + datetime.timedelta(hours=23, minutes=59, seconds=59)
@@ -96,8 +96,8 @@ class TicketFilteringView(APIView):
         # if location_serializer.is_valid():
         context["location"] = location_serializer.data
 
-        if request.data.get('location') is not None:
-            location = request.data.get('location')
+        if request.GET.get('location') is not None:
+            location = request.GET.get('location')
             # filter_theater_pk_list = list(
             #     set([screen.theater.pk for screen in screens.filter(theater__location=location)]))
             sub_location_serializer = TicketTheaterSubLocationSerializer(
@@ -132,7 +132,7 @@ class TicketFilteringView(APIView):
             context["date"] = date_serializer.data
 
 
-        if request.data.get('location') is not None and request.data.get('sub_location') is not None and request.data.get('time') is not None and request.data.get('movie') is not None:
+        if request.GET.get('location') is not None and request.GET.get('sub_location') is not None and request.GET.get('time') is not None and request.GET.get('movie') is not None:
             serializer = TicketScreeningTimeSerializer(
                 screens, many=True
             )
@@ -166,15 +166,15 @@ class AppTicketFilteringView(APIView):
             return Q(movie__isnull=False)
 
     def location_filter(self, request):
-        if request.data.get('location') is not None:
-            location = request.data.get('location')
+        if request.GET.get('location') is not None:
+            location = request.GET.get('location')
             return Q(theater__location=location)
         else:
             return Q(theater__location__isnull=False)
 
     def time_filter(self, request):
-        if request.data.get('time') is not None:
-            raw_time = request.data.get('time') + ' 00:00:00'
+        if request.GET.get('time') is not None:
+            raw_time = request.GET.get('time') + ' 00:00:00'
             base_time = datetime.datetime.strptime(raw_time, '%Y-%m-%d %H:%M:%S')
             max_time = base_time + datetime.timedelta(hours=23, minutes=59, seconds=59)
 
@@ -212,8 +212,8 @@ class AppTicketFilteringView(APIView):
 
         context["location"] = location_serializer.data
 
-        if request.data.get('location') is not None:
-            location = request.data.get('location')
+        if request.GET.get('location') is not None:
+            location = request.GET.get('location')
             sub_location_serializer = AppTicketTheaterSubLocationSerializer(
                 Theater.objects.order_by('sub_location').distinct('sub_location').filter(Q(location=location) & Q(screenings__movie__pk=pk)),
                 context={"pk": pk},
@@ -276,7 +276,7 @@ class TicketReservationView(APIView):
         permissions.IsAuthenticated,
     )
 
-    def get(self, request):
+    def post(self, request):
         try:
             with transaction.atomic():
                 screen = Screening.objects.get(pk=request.data.get("screen"))
