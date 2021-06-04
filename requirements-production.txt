@@ -1,5 +1,5 @@
 boto3<1.10
-Django<2.2
+Django<2.3
 django-cors-headers<2.5.0
 djangorestframework<3.10
 django-storages<1.8
