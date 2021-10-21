@@ -2,7 +2,7 @@ amqp==2.3.2
 anyjson==0.3.3
 appnope==0.1.0
 awsebcli==3.14.6
-Babel==2.6.0
+Babel==2.9.1
 backcall==0.1.0
 billiard==3.5.0.5
 blessed==1.15.0
